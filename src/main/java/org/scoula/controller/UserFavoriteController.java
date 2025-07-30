@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.scoula.dto.FavoriteRequestDTO;
+import org.scoula.dto.HouseListDTO;
 import org.scoula.dto.UserFavoriteDTO;
 import org.scoula.dto.swagger.Auth.SwaggerPasswordChangeRequestDTO;
 import org.scoula.mapper.UserMapper;
@@ -66,22 +67,23 @@ public class UserFavoriteController {
         }
     }
 
-//    // 특정 사용자의 즐겨찾기 목록
-//    @GetMapping("/list")
-//    public ResponseEntity<?> getFavorites(@RequestHeader("Authorization") String bearerToken) {
-//        try {
-//            //  1. access 토큰 꺼내기
-//            String accessToken = tokenUtils.extractAccessToken(bearerToken);
-//            String username = jwtProcessor.getUsername(accessToken);
-//            int usersIdx = userMapper.findUserIdxByUserId(username);
-//
-//            return ResponseEntity.ok(userFavoriteService.getFavorites(usersIdx));
-//        } catch (Exception e) {
-//            log.error("사용자 즐겨찾기 목록 읽는 중 오류", e);
-//            return ResponseEntity.status(500).body(Map.of("error", "사용자 즐겨찾기 목록 읽는 중 오류"));
-//        }
-//    }
-//
+    // 특정 사용자의 즐겨찾기 목록
+    @GetMapping("/list")
+    public ResponseEntity<?> getFavorites(@RequestHeader("Authorization") String bearerToken) {
+        try {
+            String accessToken = tokenUtils.extractAccessToken(bearerToken);
+            String username = jwtProcessor.getUsername(accessToken);
+            int usersIdx = userMapper.findUserIdxByUserId(username);
+
+            List<HouseListDTO> favorites = userFavoriteService.getFavoriteHouses(usersIdx);
+            return ResponseEntity.ok(favorites);
+
+        } catch (Exception e) {
+            log.error("즐겨찾기 목록 조회 실패", e);
+            return ResponseEntity.status(500).body(Map.of("error", "즐겨찾기 목록 조회 중 오류"));
+        }
+    }
+
 
 
 }

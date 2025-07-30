@@ -49,6 +49,32 @@
           AND office_pblanc = #{officePblanc}
     </delete>
 
+    <select id="findAptHouseByPblancNo" resultType="org.scoula.dto.HouseListDTO">
+        SELECT *
+        FROM vw_all_house_list
+        WHERE pblanc_no = #{pblancNo}
+          AND house_type IN ('APT', '신혼희망타운')
+    </select>
 
+
+    <select id="findOfficetelHouseByPblancNo" resultType="org.scoula.dto.HouseListDTO">
+        SELECT *
+        FROM vw_all_house_list
+        WHERE pblanc_no = #{pblancNo}
+          AND house_type IN ('오피스텔', '도시형생활주택')
+    </select>
+
+
+    <select id="findFavoritesByUsersIdx" resultType="org.scoula.dto.UserFavoriteDTO">
+        SELECT
+            user_favorite_idx,
+            users_idx,
+            apt_pblanc,
+            office_pblanc,
+            predicted_win_rate,
+            predicted_cutoff_score
+        FROM user_favorite
+        WHERE users_idx = #{usersIdx}
+    </select>
 
 </mapper>

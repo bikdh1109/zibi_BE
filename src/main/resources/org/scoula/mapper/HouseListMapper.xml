@@ -6,7 +6,7 @@
 <mapper namespace="org.scoula.mapper.HouseListMapper">
 
     <select id="getAllHouseList" resultType="org.scoula.dto.HouseListDTO">
-        SELECT * FROM vw_all_housing_list
+        SELECT * FROM vw_all_house_list
     </select>
 
 </mapper>

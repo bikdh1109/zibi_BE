@@ -2,10 +2,12 @@ package org.scoula.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.scoula.dto.HouseListDTO;
 import org.scoula.dto.UserFavoriteDTO;
 import org.scoula.mapper.UserFavoriteMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -74,8 +76,19 @@ public class UserFavoriteService {
     }
 
 //
-//    /**즐겨찾기 목록 조회*/
-//    public List<UserFavoriteDTO> getFavorites(int usersIdx) {
-//        return mapper.findFavoritesByUsersIdx(usersIdx);
-//    }
+public List<HouseListDTO> getFavoriteHouses(int usersIdx) {
+    List<UserFavoriteDTO> favorites = mapper.findFavoritesByUsersIdx(usersIdx);
+    List<HouseListDTO> result = new ArrayList<>();
+
+    for (UserFavoriteDTO fav : favorites) {
+        if (fav.getAptPblanc() != null) {
+            result.addAll(mapper.findAptHouseByPblancNo(fav.getAptPblanc()));
+        }
+        if (fav.getOfficePblanc() != null) {
+            result.addAll(mapper.findOfficetelHouseByPblancNo(fav.getOfficePblanc()));
+        }
+    }
+
+    return result;
+    }
 }
