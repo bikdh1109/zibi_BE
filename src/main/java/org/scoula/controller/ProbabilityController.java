@@ -1,5 +1,6 @@
 package org.scoula.controller;
 
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.scoula.dto.ProbabilityDTO;
 import org.scoula.service.ProbabilityService;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@Api(tags = "❌❌미구현 ❌❌")
 @RequestMapping("/api/probability")
 public class ProbabilityController {
 

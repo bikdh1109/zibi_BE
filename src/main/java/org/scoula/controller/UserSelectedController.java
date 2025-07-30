@@ -44,19 +44,19 @@ public class UserSelectedController {
         return ResponseEntity.ok(response);
     }
 
-//    @GetMapping
-//    @ApiOperation(value = "선호 정보 조회", notes = "로그인된 사용자의 선호 정보를 조회합니다.")
-//    @ApiResponses({
-//            @ApiResponse(code = 200, message = "조회 성공", response = UserSelectedDTO.class),
-//            @ApiResponse(code = 401, message = "인증 실패"),
-//            @ApiResponse(code = 404, message = "선호 정보 없음")
-//    })
-//
-//    public ResponseEntity<UserSelectedDTO> getUserSelected(
-//            @ApiParam(hidden = true) @RequestHeader("Authorization") String token
-//    ) {
-//        String userId = extractUserIdFromToken(token);
-//        UserSelectedDTO dto = userSelectedService.getUserSelected(userId);
-//        return ResponseEntity.ok(dto);
-//    }
+    @GetMapping
+    @ApiOperation(value = "❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌", notes = "로그인된 사용자의 선호 정보를 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "조회 성공", response = UserSelectedDTO.class),
+            @ApiResponse(code = 401, message = "인증 실패"),
+            @ApiResponse(code = 404, message = "선호 정보 없음")
+    })
+
+    public ResponseEntity<UserSelectedDTO> getUserSelected(
+            @ApiParam(hidden = true) @RequestHeader("Authorization") String token
+    ) {
+        String userId = extractUserIdFromToken(token);
+        UserSelectedDTO dto = userSelectedService.getUserSelected(userId);
+        return ResponseEntity.ok(dto);
+    }
 }
