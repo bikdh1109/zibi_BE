@@ -27,4 +27,5 @@ public interface UserMapper {
     int updatePasswordByUsername(MemberDTO member);
 
     int resetPassword(SwaggerPasswordResetRequestDTO request);
+    int insertUserInfo(@Param("usersIdx") int usersIdx);
 }

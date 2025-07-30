@@ -84,7 +84,10 @@
         INSERT INTO users_auth (user_idx, auth)
         VALUES (#{usersIdx}, #{auth})
     </insert>
-
+    <insert id="insertUserInfo" parameterType="int">
+        INSERT INTO user_info (users_idx)
+        VALUES (#{usersIdx})
+    </insert>
 
 
 </mapper>
