@@ -110,7 +110,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/v1/account/**").hasRole("MEMBER")
                 .antMatchers("/v1/email/**").permitAll()
                 .antMatchers("/v1/subscriptions/**").hasRole("MEMBER")
-                .antMatchers("/oauth/kakao/**").permitAll()
+                .antMatchers("/api/oauth/kakao/**").permitAll()
                 .anyRequest().authenticated(); //나머지는로그인된경우모두허용
 
 
