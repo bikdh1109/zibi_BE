@@ -12,46 +12,56 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = { UserFavoriteService.class, RootConfig.class }) // AptService만 테스트
+@ContextConfiguration(classes = { UserFavoriteService.class, RootConfig.class })
 @Log4j2
 class UserFavoriteServiceTest {
-    @Autowired
-    UserFavoriteService userFavoriteService;
-    @Test
-    void addFavorite() {
-        boolean result1 = userFavoriteService.addFavorite(1, "APT", 10);
-        log.info("APT 즐겨찾기 추가 결과: {}", result1);
-        assertTrue(result1 || !result1);  // 단순 실행 테스트 (값 확인 가능)
 
-        boolean result2 = userFavoriteService.addFavorite(1, "OFFI", 3);
-        log.info("OFFI 즐겨찾기 추가 결과: {}", result2);
-        assertTrue(result2 || !result2);
+    @Autowired
+    private UserFavoriteService userFavoriteService;
+
+    /**
+     * APT 공고번호를 즐겨찾기에 추가했을 때
+     */
+    @Test
+    void addFavorite_apt() {
+        String aptPblancNo = "2025950040";  // 테스트용 공고번호
+        boolean result = userFavoriteService.addFavorite(1, "APT", aptPblancNo);
+        log.info("APT 즐겨찾기 추가 결과: {}", result);
+        assertTrue(result || !result);  // 단순 실행 확인
     }
 
+    /**
+     * 오피스텔 공고번호를 즐겨찾기에 추가했을 때
+     */
+    @Test
+    void addFavorite_offi() {
+        String offiPblancNo = "2025950040";  // 테스트용 공고번호
+        boolean result = userFavoriteService.addFavorite(1, "OFFI", offiPblancNo);
+        log.info("OFFI 즐겨찾기 추가 결과: {}", result);
+        assertTrue(result || !result);
+    }
+
+    /**
+     * 즐겨찾기 삭제
+     */
     @Test
     void deleteFavorite() {
-        boolean result = userFavoriteService.deleteFavorite(2);
-        log.info("즐겨찾기 삭제 결과 (userFavoriteIdx=2): {}", result);
-        assertTrue(result || !result); // 단순 실행 확인용
+        int testFavoriteIdx = 1;  // 존재 여부에 따라 조정
+        boolean result = userFavoriteService.deleteFavorite(testFavoriteIdx);
+        log.info("즐겨찾기 삭제 결과 (userFavoriteIdx={}): {}", testFavoriteIdx, result);
+        assertTrue(result || !result);
     }
 
+    /**
+     * 특정 사용자의 즐겨찾기 목록 조회
+     */
     @Test
     void getFavorites() {
-        List<UserFavoriteDTO> favorites = userFavoriteService.getFavorites(1);
+        int usersIdx = 1;
+        List<UserFavoriteDTO> favorites = userFavoriteService.getFavorites(usersIdx);
         assertNotNull(favorites);
-        log.info("즐겨찾기 목록 크기: {}", favorites.size());
-    }
-
-    @Test
-    void isFavorite() {
-        boolean isAptFavorite = userFavoriteService.isFavoriteAPT(1, 10);
-        log.info("APT 즐겨찾기 여부 (usersIdx=1, noticeIdx=10): {}", isAptFavorite);
-
-        boolean isOffiFavorite = userFavoriteService.isFavoriteOFFI(1, 3);
-        log.info("OFFI 즐겨찾기 여부 (usersIdx=1, noticeIdx=3): {}", isOffiFavorite);
-
-        assertTrue(isAptFavorite || !isAptFavorite);
-        assertTrue(isOffiFavorite || !isOffiFavorite);
+        log.info("usersIdx={} 의 즐겨찾기 개수: {}", usersIdx, favorites.size());
     }
 }

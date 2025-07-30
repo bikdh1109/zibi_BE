@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.scoula.dto.UserFavoriteDTO;
 import org.scoula.mapper.UserFavoriteMapper;
-import org.scoula.mapper.UserMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,64 +12,54 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserFavoriteService {
-    private final UserFavoriteMapper userFavoriteMapper;
+    private final UserFavoriteMapper mapper;
 
-    // 즐겨찾기 추가
-    public boolean addFavorite(int usersIdx, String houseType, int noticeIdx) {
+    /** 즐겨찾기 추가*/
+    public boolean addFavorite(int usersIdx, String houseType, String pblancNo) {
         try {
-            UserFavoriteDTO favorite = new UserFavoriteDTO();
-            favorite.setUsersIdx(usersIdx);
+            // 1) 중복 체크
+            boolean exists;
             if ("APT".equals(houseType) || "신혼희망타운".equals(houseType)) {
-                if (isFavoriteAPT(usersIdx, noticeIdx)) {
-                    log.info("APT 즐겨찾기가 이미 존재합니다. usersIdx={}, noticeIdx={}", usersIdx, noticeIdx);
-                    return false;  // 이미 존재
-                }
-                favorite.setAptIdx(noticeIdx);
-                favorite.setOffiIdx(null);
+                exists = mapper.countByUsersIdxAndAptPblanc(usersIdx, pblancNo) > 0;
             } else {
-                if (isFavoriteOFFI(usersIdx, noticeIdx)) {
-                    log.info("OFFI 즐겨찾기가 이미 존재합니다. usersIdx={}, noticeIdx={}", usersIdx, noticeIdx);
-                    return false;  // 이미 존재
-                }
-                favorite.setOffiIdx(noticeIdx);
-                favorite.setAptIdx(null);
+                exists = mapper.countByUsersIdxAndOfficePblanc(usersIdx, pblancNo) > 0;
+            }
+            if (exists) {
+                log.info("{} 즐겨찾기가 이미 존재합니다. usersIdx={}, pblancNo={}", houseType, usersIdx, pblancNo);
+                return false;
             }
 
-            if (userFavoriteMapper.insertUserFavorite(favorite) == 1) {
-                return true;
+            // 2) DTO 세팅
+            UserFavoriteDTO fav = new UserFavoriteDTO();
+            fav.setUsersIdx(usersIdx);
+            if ("APT".equals(houseType) || "신혼희망타운".equals(houseType)) {
+                fav.setAptPblanc(pblancNo);
+                fav.setOfficePblanc(null);
+            } else {
+                fav.setOfficePblanc(pblancNo);
+                fav.setAptPblanc(null);
             }
-            return false;
 
+            // 3) 삽입 실행
+            return mapper.insertUserFavorite(fav) == 1;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("즐겨찾기 추가 실패: {}", e.getMessage(), e);
             return false;
         }
     }
-
-    // 즐겨찾기 해제
-    public boolean deleteFavorite(int userFavoriteIdx) {
-        try {
-            if (userFavoriteMapper.deleteUserFavorite(userFavoriteIdx) == 1) {
-                return true;
-            }
-            return false;
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return false;
-        }
-    }
-
-    // 즐겨찾기 목록 조회
-    public List<UserFavoriteDTO> getFavorites(int usersIdx) {
-        return userFavoriteMapper.findFavoritesByUsersIdx(usersIdx);
-    }
-
-    // 즐겨찾기 여부 확인
-    public boolean isFavoriteAPT(int usersIdx, int noticeIdx) {
-        return userFavoriteMapper.isFavoriteAPT(usersIdx, noticeIdx);
-    }
-
-    public boolean isFavoriteOFFI(int usersIdx, int noticeIdx) {
-        return userFavoriteMapper.isFavoriteOFFI(usersIdx, noticeIdx);
-    }
+//
+//    /**즐겨찾기 해제*/
+//    public boolean deleteFavorite(int userFavoriteIdx) {
+//        try {
+//            return mapper.deleteUserFavorite(userFavoriteIdx) == 1;
+//        } catch (Exception e) {
+//            log.error("즐겨찾기 삭제 실패: {}", e.getMessage(), e);
+//            return false;
+//        }
+//    }
+//
+//    /**즐겨찾기 목록 조회*/
+//    public List<UserFavoriteDTO> getFavorites(int usersIdx) {
+//        return mapper.findFavoritesByUsersIdx(usersIdx);
+//    }
 }

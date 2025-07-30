@@ -8,19 +8,25 @@ import java.util.List;
 
 @Mapper
 public interface UserFavoriteMapper {
-    // 즐겨찾기 추가
+    /** 단일 즐겨찾기 추가 */
     int insertUserFavorite(UserFavoriteDTO favorite);
 
-    // 특정 사용자의 즐겨찾기 리스트 조회
-    List<UserFavoriteDTO> findFavoritesByUsersIdx(int usersIdx);
 
-    // 특정 즐겨찾기 삭제
-    int deleteUserFavorite(int userFavoriteIdx);
+//    /** 특정 사용자의 즐겨찾기 리스트 조회 */
+//    List<UserFavoriteDTO> findFavoritesByUsersIdx(int usersIdx);
+//
+//    /** 특정 즐겨찾기 삭제 */
+//    int deleteUserFavorite(int userFavoriteIdx);
 
-    // 아파트 즐겨찾기 여부
-    boolean isFavoriteAPT(@Param("usersIdx") int usersIdx, @Param("noticeIdx") int noticeIdx);
+    /** APT 공고번호 기준 중복 체크 */
+    int countByUsersIdxAndAptPblanc(
+            @Param("usersIdx")   int usersIdx,
+            @Param("aptPblanc") String aptPblanc
+    );
 
-    // 오피스텔 즐겨찾기 여부
-    boolean isFavoriteOFFI(@Param("usersIdx") int usersIdx, @Param("noticeIdx") int noticeIdx);
-
+    /** 오피스텔 공고번호 기준 중복 체크 */
+    int countByUsersIdxAndOfficePblanc(
+            @Param("usersIdx")      int usersIdx,
+            @Param("officePblanc") String officePblanc
+    );
 }

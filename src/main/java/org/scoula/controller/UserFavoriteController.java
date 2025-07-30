@@ -34,45 +34,40 @@ public class UserFavoriteController {
     public static final String BEARER_PREFIX = "Bearer ";
 
     // 즐겨찾기 추가
-    @PostMapping
-    public ResponseEntity<String> addFavorite(@RequestBody FavoriteRequestDTO favorite) {
-        boolean success = userFavoriteService.addFavorite(favorite.getUsersIdx(), favorite.getHouseType(), favorite.getNoticeIdx());
+    @PostMapping(produces = "application/json; charset=UTF-8")
+    public ResponseEntity<?> addFavorite(@RequestHeader ("Authorization") String bearerToken , @RequestBody FavoriteRequestDTO favorite) {
+        String accessToken = tokenUtils.extractAccessToken(bearerToken);
+        String username = jwtProcessor.getUsername(accessToken);
+        int usersIdx = userMapper.findUserIdxByUserId(username);
+        favorite.setUsersIdx(usersIdx);
+
+        boolean success = userFavoriteService.addFavorite(favorite.getUsersIdx(), favorite.getHouseType(), favorite.getPblancNo());
         return success ? ResponseEntity.ok("즐겨찾기 추가 완료") :
                 ResponseEntity.badRequest().body("이미 즐겨찾기에 존재합니다.");
     }
 
-    // 특정 사용자의 즐겨찾기 목록
-    @GetMapping("/list")
-    public ResponseEntity<?> getFavorites(@RequestHeader("Authorization") String bearerToken) {
-        try {
-            //  1. access 토큰 꺼내기
-            String accessToken = null;
-            if (bearerToken != null && bearerToken.startsWith(BEARER_PREFIX)) {
-                accessToken = bearerToken.substring(BEARER_PREFIX.length());}
-            else {
-                return ResponseEntity.status(400).body(Map.of("error", "Authorization 헤더가 유효하지 않습니다"));}
-
-            // 2. 유효성 검사하기
-            if (!jwtProcessor.validateToken(accessToken)) {
-                return ResponseEntity.status(401).body(Map.of("error", "유효하지 않은 Access Token"));}
-
-            // 3. Refresh Token 삭제
-            String username = jwtProcessor.getUsername(accessToken);
-            int usersIdx = userMapper.findUserIdxByUserId(username);
-
-            return ResponseEntity.ok(userFavoriteService.getFavorites(usersIdx));
-        } catch (Exception e) {
-            log.error("사용자 즐겨찾기 목록 읽는 중 오류", e);
-            return ResponseEntity.status(500).body(Map.of("error", "사용자 즐겨찾기 목록 읽는 중 오류"));
-        }
-    }
-
-    // 즐겨찾기 삭제
-    @DeleteMapping("/{favoriteId}")
-    public ResponseEntity<String> removeFavorite(@PathVariable("favoriteId") int favoriteId) {
-        boolean success = userFavoriteService.deleteFavorite(favoriteId);
-        return success ? ResponseEntity.ok("즐겨찾기 삭제 완료") :
-                ResponseEntity.badRequest().body("삭제 실패");
-    }
+//    // 특정 사용자의 즐겨찾기 목록
+//    @GetMapping("/list")
+//    public ResponseEntity<?> getFavorites(@RequestHeader("Authorization") String bearerToken) {
+//        try {
+//            //  1. access 토큰 꺼내기
+//            String accessToken = tokenUtils.extractAccessToken(bearerToken);
+//            String username = jwtProcessor.getUsername(accessToken);
+//            int usersIdx = userMapper.findUserIdxByUserId(username);
+//
+//            return ResponseEntity.ok(userFavoriteService.getFavorites(usersIdx));
+//        } catch (Exception e) {
+//            log.error("사용자 즐겨찾기 목록 읽는 중 오류", e);
+//            return ResponseEntity.status(500).body(Map.of("error", "사용자 즐겨찾기 목록 읽는 중 오류"));
+//        }
+//    }
+//
+//    // 즐겨찾기 삭제
+//    @DeleteMapping("/{favoriteId}")
+//    public ResponseEntity<String> removeFavorite(@PathVariable("favoriteId") int favoriteId) {
+//        boolean success = userFavoriteService.deleteFavorite(favoriteId);
+//        return success ? ResponseEntity.ok("즐겨찾기 삭제 완료") :
+//                ResponseEntity.badRequest().body("삭제 실패");
+//    }
 
 }
