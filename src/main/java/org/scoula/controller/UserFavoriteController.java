@@ -45,6 +45,26 @@ public class UserFavoriteController {
         return success ? ResponseEntity.ok("즐겨찾기 추가 완료") :
                 ResponseEntity.badRequest().body("이미 즐겨찾기에 존재합니다.");
     }
+    // 즐겨찾기 삭제
+    @DeleteMapping(produces = "application/json; charset=UTF-8")
+    public ResponseEntity<String> removeFavorite(
+            @RequestHeader("Authorization") String bearerToken,
+            @RequestParam("house_type") String houseType,
+            @RequestParam("pblanc_no") String pblancNo
+    ) {
+        try {
+            String accessToken = tokenUtils.extractAccessToken(bearerToken);
+            String username = jwtProcessor.getUsername(accessToken);
+            int usersIdx = userMapper.findUserIdxByUserId(username);
+
+            boolean success = userFavoriteService.deleteFavorite(usersIdx, houseType, pblancNo);
+
+            return success ? ResponseEntity.ok("즐겨찾기 삭제 완료") : ResponseEntity.badRequest().body("즐겨찾기가 존재하지 않거나 삭제 실패");
+        } catch (Exception e) {
+            log.error("즐겨찾기 삭제 중 오류", e);
+            return ResponseEntity.internalServerError().body("서버 오류 발생");
+        }
+    }
 
 //    // 특정 사용자의 즐겨찾기 목록
 //    @GetMapping("/list")
@@ -62,12 +82,6 @@ public class UserFavoriteController {
 //        }
 //    }
 //
-//    // 즐겨찾기 삭제
-//    @DeleteMapping("/{favoriteId}")
-//    public ResponseEntity<String> removeFavorite(@PathVariable("favoriteId") int favoriteId) {
-//        boolean success = userFavoriteService.deleteFavorite(favoriteId);
-//        return success ? ResponseEntity.ok("즐겨찾기 삭제 완료") :
-//                ResponseEntity.badRequest().body("삭제 실패");
-//    }
+
 
 }

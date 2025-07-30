@@ -43,25 +43,6 @@ class UserFavoriteServiceTest {
         assertTrue(result || !result);
     }
 
-    /**
-     * 즐겨찾기 삭제
-     */
-    @Test
-    void deleteFavorite() {
-        int testFavoriteIdx = 1;  // 존재 여부에 따라 조정
-        boolean result = userFavoriteService.deleteFavorite(testFavoriteIdx);
-        log.info("즐겨찾기 삭제 결과 (userFavoriteIdx={}): {}", testFavoriteIdx, result);
-        assertTrue(result || !result);
-    }
 
-    /**
-     * 특정 사용자의 즐겨찾기 목록 조회
-     */
-    @Test
-    void getFavorites() {
-        int usersIdx = 1;
-        List<UserFavoriteDTO> favorites = userFavoriteService.getFavorites(usersIdx);
-        assertNotNull(favorites);
-        log.info("usersIdx={} 의 즐겨찾기 개수: {}", usersIdx, favorites.size());
-    }
+
 }

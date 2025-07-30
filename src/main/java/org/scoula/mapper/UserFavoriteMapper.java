@@ -29,4 +29,8 @@ public interface UserFavoriteMapper {
             @Param("usersIdx")      int usersIdx,
             @Param("officePblanc") String officePblanc
     );
+
+    int deleteByUsersIdxAndAptPblanc(@Param("usersIdx") int usersIdx, @Param("aptPblanc") String aptPblanc);
+
+    int deleteByUsersIdxAndOfficePblanc(@Param("usersIdx") int usersIdx,@Param("officePblanc") String officePblanc);
 }

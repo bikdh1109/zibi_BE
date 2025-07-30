@@ -37,5 +37,18 @@
           AND office_pblanc  = #{officePblanc}
     </select>
 
+    <delete id="deleteByUsersIdxAndAptPblanc" parameterType="map">
+        DELETE FROM user_favorite
+        WHERE users_idx = #{usersIdx}
+          AND apt_pblanc = #{aptPblanc}
+    </delete>
+
+    <delete id="deleteByUsersIdxAndOfficePblanc" parameterType="map">
+        DELETE FROM user_favorite
+        WHERE users_idx = #{usersIdx}
+          AND office_pblanc = #{officePblanc}
+    </delete>
+
+
 
 </mapper>
