@@ -11,6 +11,9 @@ import java.util.List;
 @Data
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class OfficetelDetailDTO {
+    @JsonProperty("favorite_count")
+    private Integer favoriteCount;
+    @JsonProperty("view_count")
     private Integer viewCount;
     private String houseManageNo;
     private String pblancNo;

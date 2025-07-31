@@ -307,6 +307,7 @@
 
     <resultMap id="officetelDetailMap" type="org.scoula.dto.OfficetelDetailDTO">
         <id property="pblancNo" column="pblanc_no"/>
+        <result property="favoriteCount" column="favorite_count"/>
         <result property="viewCount" column="view_count"/>
         <result property="houseManageNo" column="house_manage_no"/>
         <result property="houseNm" column="house_nm"/>
@@ -366,7 +367,9 @@
             ott.suply_amount,
             ott.subscrpt_reqst_amount,
             ott.house_manage_no ,
-            ott.pblanc_no
+            ott.pblanc_no,
+        (SELECT COUNT(*) FROM user_favorite uf WHERE uf.office_pblanc = ot.pblanc_no) AS favorite_count
+
         FROM officetel_table ot
                  LEFT JOIN officetel_type ott
                            ON ot.officetel_idx = ott.officetel_idx
