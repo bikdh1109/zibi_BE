@@ -5,36 +5,54 @@
 
 <mapper namespace="org.scoula.mapper.GaScoreMapper">
 
-    <update id="updateScore">
-        UPDATE user_info
-        SET no_house_period = #{gaScoreDTO.noHousePeriod},
-            dependents_nm = #{gaScoreDTO.dependentsNm},
-            no_house_score = #{gaScoreDTO.noHouseScore},
-            dependents_score = #{gaScoreDTO.dependentsScore},
-            payment_period_score = #{gaScoreDTO.paymentPeriodScore}
+    <!-- 청약 가점 저장 -->
+    <insert id="insertGaScore">
+        INSERT INTO user_info (
+            users_idx,
+            no_house_period,
+            dependents_nm,
+            no_house_score,
+            dependents_score,
+            payment_period,
+            payment_period_score,
+            head_of_household,
+            house_owner,
+            house_disposal,
+            disposal_date,
+            marital_status,
+            wedding_date,
+            total_ga_score
+        )
+        VALUES (
+                   #{userIdx},
+                   #{dto.noHousePeriod},
+                   #{dto.dependentsNm},
+                   #{dto.noHouseScore},
+                   #{dto.dependentsScore},
+                   #{dto.paymentPeriod},
+                   #{dto.paymentPeriodScore},
+                   #{dto.headOfHousehold},
+                   #{dto.houseOwner},
+                   #{dto.houseDisposal},
+                   #{dto.disposalDate},
+                   #{dto.maritalStatus},
+                   #{dto.weddingDate},
+                   #{dto.totalGaScore}
+               )
+        ON DUPLICATE KEY UPDATE
+                             no_house_period      = VALUES(no_house_period),
+                             dependents_nm        = VALUES(dependents_nm),
+                             no_house_score       = VALUES(no_house_score),
+                             dependents_score     = VALUES(dependents_score),
+                             payment_period       = VALUES(payment_period),
+                             payment_period_score = VALUES(payment_period_score),
+                             head_of_household    = VALUES(head_of_household),
+                             house_owner          = VALUES(house_owner),
+                             house_disposal       = VALUES(house_disposal),
+                             disposal_date        = VALUES(disposal_date),
+                             marital_status       = VALUES(marital_status),
+                             wedding_date         = VALUES(wedding_date),
+                             total_ga_score       = VALUES(total_ga_score)
+    </insert>
 
-        WHERE users_idx = #{userIdx}
-    </update>
-
-    <update id="updateTotalScore">
-        UPDATE user_info
-        SET total_ga_score = #{totalScore}
-        WHERE users_idx = #{userIdx}
-    </update>
-
-    <select id="getScoresByUserIdx" resultType="org.scoula.dto.GaScoreDTO">
-        SELECT
-            no_house_score AS noHouseScore,
-            dependents_score AS dependentsScore,
-            payment_period_score AS paymentPeriodScore
-        FROM user_info
-        WHERE users_idx = #{userIdx}
-    </select>
-
-    <select id="getTotalScoreByUserIdx" resultType="int">
-        SELECT total_ga_score
-
-        FROM user_info
-        WHERE users_idx = #{userIdx}
-    </select>
 </mapper>

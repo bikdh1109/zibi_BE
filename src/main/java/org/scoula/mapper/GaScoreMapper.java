@@ -7,13 +7,6 @@ import org.scoula.dto.GaScoreDTO;
 @Mapper
 public interface GaScoreMapper {
 
-    void updateScore(@Param("userIdx") int userIdx,
-                     @Param("gaScoreDTO") GaScoreDTO gaScoreDTO);
-
-    void updateTotalScore(@Param("userIdx") int userIdx,
-                          @Param("totalScore") int totalScore);
-
-    GaScoreDTO getScoresByUserIdx(@Param("userIdx") int userIdx);
-
-    int getTotalScoreByUserIdx(@Param("userIdx") int userIdx);
+    // 청약 가점 정보 저장
+    void insertGaScore(@Param("dto") GaScoreDTO dto, @Param("userIdx") int userIdx);
 }

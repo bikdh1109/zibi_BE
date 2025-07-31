@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.scoula.dto.oauth.KakaoUserInfoDto;
 import org.scoula.mapper.UserMapper;
+import org.scoula.security.dto.AuthDTO;
 import org.scoula.security.dto.MemberDTO;
 import org.scoula.security.util.JwtProcessor;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.time.ZoneId;
 
 import java.util.Optional;
 //import org.scoula.domain.user.User;
@@ -41,7 +46,7 @@ public class KakaoOauthService {
 
         // JWT 발급 (JwtProcessor 사용)
         String jwtToken = jwtProcessor.generateAccessToken(user.getUserId());
-        userInfo.setToken(jwtToken);
+//        userInfo.setToken(jwtToken);
 
         return userInfo;
     }
@@ -89,6 +94,38 @@ public class KakaoOauthService {
         }
     }
 
+    public String getShippingAddress(String accessToken) {
+        String url = "https://kapi.kakao.com/v1/user/shipping_address";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, HttpMethod.GET, entity, String.class
+            );
+
+            log.info("배송지 정보 응답: {}", response.getBody());
+
+            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode addresses = root.path("shipping_addresses");
+
+            if (addresses.isArray() && addresses.size() > 0) {
+                String fullAddress = addresses.get(0).path("base_address").asText();
+                return fullAddress.split(" ")[0] + " " + fullAddress.split(" ")[1];
+            } else {
+                return null;
+            }
+
+        } catch (Exception e) {
+            log.error("배송지 정보 요청 실패", e);
+            throw new RuntimeException("배송지 정보 요청 실패", e);
+        }
+    }
+
+
     public KakaoUserInfoDto getUserInfo(String accessToken) {
         String userUrl = "https://kapi.kakao.com/v2/user/me";
 
@@ -113,12 +150,19 @@ public class KakaoOauthService {
 
             JsonNode kakaoAccount = root.get("kakao_account");
             String email = kakaoAccount.get("email").asText(null);
+            String name = kakaoAccount.path("name").asText(null);
+            String birthday = kakaoAccount.path("birthday").asText(null);
+            String birthyear = kakaoAccount.path("birthyear").asText(null);
+
+            // 배송지 정보 추출
+            String shippingAddress = getShippingAddress(accessToken);
+
+            log.info("Shipping address: {}", shippingAddress);
 
             JsonNode profile = kakaoAccount.get("profile");
             String nickname = profile.get("nickname").asText(null);
-            String profileImageUrl = profile.get("profile_image_url").asText(null);
 
-            return new KakaoUserInfoDto(kakaoId, email, nickname, profileImageUrl, null);
+            return new KakaoUserInfoDto(kakaoId, email, nickname, name, birthday, birthyear, shippingAddress, null);
         } catch (Exception e) {
             log.error("카카오 사용자 정보 요청 실패", e);
             throw new RuntimeException("카카오 사용자 정보 요청 실패");
@@ -130,20 +174,40 @@ public class KakaoOauthService {
         MemberDTO existingUser = userMapper.findById(userInfo.getEmail());
 
         if (existingUser != null) {
-            int count = userMapper.countUserByIdx((long) existingUser.getUsersIdx());
+            int count = userMapper.countUserByIdx(existingUser.getUsersIdx());
             if (count == 0) {
-                userMapper.insertUserAuth((long) existingUser.getUsersIdx());
+                AuthDTO authUser = new AuthDTO();
+                authUser.setUsersIdx(existingUser.getUsersIdx());
+                authUser.setAuth("ROLE_MEMBER");
+                userMapper.insertAuth(authUser);
             }
             return existingUser;
         }
 
         MemberDTO kakaoUser = new MemberDTO();
+        kakaoUser.setKakaoUserId(userInfo.getKakaoId());
         kakaoUser.setUserId(userInfo.getEmail());
-        kakaoUser.setUserName(userInfo.getNickname());
+        kakaoUser.setUserName(userInfo.getName());
+        kakaoUser.setAddress(userInfo.getShippingAddress());
         kakaoUser.setPassword(null);
 
+        /* 사용자 생일 정보 받기 */
+        String birthyear = userInfo.getBirthyear();
+        String birthday = userInfo.getBirthday();
+        String birthyearday = birthyear + "-" + birthday.substring(0, 2) + "-" + birthday.substring(2, 4);
+        // 문자열 → LocalDate
+        LocalDate localDate = LocalDate.parse(birthyearday, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        // LocalDate → Date
+        Date birthdate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        kakaoUser.setBirthdate(birthdate);
+
+        /* users 테이블에 kakao 계정 정보 저장 */
         userMapper.insertUser(kakaoUser);
-        userMapper.insertUserAuth((long) kakaoUser.getUsersIdx());
+
+        AuthDTO kakaoAuth = new AuthDTO();
+        kakaoAuth.setAuth("ROLE_MEMBER");
+        kakaoAuth.setUsersIdx(userMapper.findUserIdxByUserId(userInfo.getEmail()));
+        userMapper.insertAuth(kakaoAuth);
         return kakaoUser;
     }
 }

@@ -183,8 +183,19 @@ public class AptService {
 
     }
 
-
-
+    public AptDetailDTO getAptDetail(String pblancNo) {
+        try {
+            AptDetailDTO dto = aptMapper.getAptDetails(pblancNo);
+            if (dto == null) {
+                log.warn("해당 공고번호 [{}]에 대한 청약 정보가 존재하지 않습니다.", pblancNo);
+                throw new IllegalArgumentException("해당 공고에 대한 정보가 존재하지 않습니다.");
+            }
+            return dto;
+        } catch (Exception e) {
+            log.error("청약 공고 상세 조회 중 예외 발생. pblancNo: {}, error: {}", pblancNo, e.getMessage(), e);
+            throw new IllegalStateException("청약 공고 상세 정보를 조회하는 중 오류가 발생했습니다.", e);
+        }
+    }
 
 
 

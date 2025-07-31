@@ -18,7 +18,7 @@ public class ProbabilityService {
 
     public double calculateProbability(ProbabilityDTO input) {
         List<ScoreRecord> records = probabilityMapper.selectScoreRecords(
-                input.getSido(), input.getSigungu(), input.getResidentCode());
+                input.getSi(), input.getGunGu(), input.getResidentCode());
 
         if (records.isEmpty()) return 0.0;
 
@@ -44,8 +44,8 @@ public class ProbabilityService {
         if (apt == null) return 0.0;
 
         ProbabilityDTO request = new ProbabilityDTO();
-        request.setSido(apt.getSido());
-        request.setSigungu(apt.getSigungu());
+        request.setSi(apt.getSido());
+        request.setGunGu(apt.getSigungu());
         request.setResidentCode(apt.getResidentCode());
         request.setSupplyCount(apt.getSupplyCount());
         request.setScore(score);

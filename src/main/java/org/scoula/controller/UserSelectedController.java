@@ -7,6 +7,9 @@ import org.scoula.service.UserSelectedService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/v1/user/preferences")
 @RequiredArgsConstructor
@@ -20,11 +23,14 @@ public class UserSelectedController {
     }
 
     @PostMapping
-    public ResponseEntity<String> saveUserSelected(@RequestHeader("Authorization") String token,
-                                                   @RequestBody UserSelectedDTO userSelectedDTO) {
+    public ResponseEntity<Map<String, String>>  saveUserSelected(@RequestHeader("Authorization") String token,
+                                                                 @RequestBody UserSelectedDTO userSelectedDTO) {
         String userId = extractUserIdFromToken(token);
         userSelectedService.saveAllPreferences(userId, userSelectedDTO);
-        return ResponseEntity.ok("사용자 선호 정보가 저장되었습니다.");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "사용자 선호 정보가 저장되었습니다.");
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping

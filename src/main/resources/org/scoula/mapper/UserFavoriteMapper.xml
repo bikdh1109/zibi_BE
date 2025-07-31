@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.scoula.mapper.UserFavoriteMapper">
+
+    <!-- 즐겨찾기 추가 -->
+    <insert id="insertUserFavorite" parameterType="org.scoula.dto.UserFavoriteDTO">
+        INSERT INTO user_favorite
+        (users_idx, apt_idx, offi_idx, predicted_win_rate, predicted_cutoff_score)
+        VALUES
+            (#{usersIdx}, #{aptIdx}, #{offiIdx}, NULL, NULL);
+    </insert>
+
+
+    <!-- 특정 사용자의 즐겨찾기 리스트 조회 -->
+    <select id="findFavoritesByUsersIdx" parameterType="int" resultType="org.scoula.dto.UserFavoriteDTO">
+        SELECT *
+        FROM user_favorite
+        WHERE users_idx = #{usersIdx};
+    </select>
+
+    <!-- 특정 즐겨찾기 삭제 -->
+    <delete id="deleteUserFavorite" parameterType="int">
+        DELETE FROM user_favorite
+        WHERE user_favorite_idx = #{userFavoriteIdx};
+    </delete>
+
+    <!-- 아파트 즐겨찾기 여부 -->
+    <select id="isFavoriteAPT" parameterType="map" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM user_favorite
+        WHERE users_idx = #{usersIdx}
+          AND apt_idx = #{noticeIdx};
+    </select>
+
+    <!-- 오피스텔 즐겨찾기 여부 -->
+    <select id="isFavoriteOFFI" parameterType="map" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM user_favorite
+        WHERE users_idx = #{usersIdx}
+          AND offi_idx = #{noticeIdx};
+    </select>
+
+</mapper>

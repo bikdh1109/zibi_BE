@@ -108,4 +108,12 @@ class OfficetelServiceTest {
         officetelService.deleteOldOfficetelDataBeforeThisMonth();
     }
 
+    @Test
+    void getAptDetail() {
+        OfficetelDetailDTO detail = officetelService.getOfficetelDetail("2025950040");
+        log.info("OfficetelDetailDTO  : {}",detail.toString());
+
+    }
+
+
 }

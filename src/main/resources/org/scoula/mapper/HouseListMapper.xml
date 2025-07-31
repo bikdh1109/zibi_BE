@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.scoula.mapper.HouseListMapper">
+
+    <select id="getAllHouseList" resultType="org.scoula.dto.HouseListDTO">
+        SELECT * FROM vw_all_housing_list
+    </select>
+
+</mapper>

@@ -88,6 +88,34 @@ AptServiceTest {
         aptService.syncAptData();
     }
 
+    @Test
+    void getAptDetail() {
+        AptDetailDTO detail = aptService.getAptDetail("2025000306");
+        log.info("AptDetailDTO {");
+        log.info("  houseManageNo: {}", detail.getHouseManageNo());
+        log.info("  pblancNo: {}", detail.getPblancNo());
+        log.info("  houseNm: {}", detail.getHouseNm());
+        log.info("  houseSecdNm: {}", detail.getHouseSecdNm());
+        log.info("  rentSecdNm: {}", detail.getRentSecdNm());
+        log.info("  hssplyAdres: {}", detail.getHssplyAdres());
+        log.info("  totSuplyHshldco: {}", detail.getTotSuplyHshldco());
+        log.info("  rcritPblancDe: {}", detail.getRcritPblancDe());
+        log.info("  cnstrctEntrpsNm: {}", detail.getCnstrctEntrpsNm());
+        log.info("  aptType: [");
+
+        for (AptTypeDTO type : detail.getAptType()) {
+            log.info("    AptTypeDTO {");
+            log.info("      houseTy: {}", type.getHouseTy());
+            log.info("      suplyAr: {}", type.getSuplyAr());
+            log.info("      suplyHshldco: {}", type.getSuplyHshldco());
+            log.info("      spsplyHshldco: {}", type.getSpsplyHshldco());
+            log.info("      lttotTopAmount: {}", type.getLttotTopAmount());
+            log.info("    }");
+        }
+        log.info("  ]");
+        log.info("}");
+    }
+
 
 
 }

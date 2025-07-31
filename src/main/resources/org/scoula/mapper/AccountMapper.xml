@@ -61,10 +61,11 @@
         LIMIT 1
     </select>
 
-    <select id="findEarliestAccountStartDate" parameterType="int" resultType="string">
-        SELECT MIN(res_account_start_date)
+    <select id="findAccountStartDate" parameterType="int" resultType="java.time.LocalDate">
+        SELECT res_account_start_date
         FROM account
         WHERE user_idx = #{userIdx}
     </select>
+
 
 </mapper>
