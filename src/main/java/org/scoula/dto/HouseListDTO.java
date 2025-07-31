@@ -7,6 +7,8 @@ import lombok.Data;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HouseListDTO {
+    @JsonProperty("favorite_count")
+    private Integer favoriteCount;
     @JsonProperty("house_nm") // 공고명
     private String houseNm;
     @JsonProperty("hssply_adres") // 공급 주소

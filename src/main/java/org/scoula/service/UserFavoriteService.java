@@ -1,6 +1,7 @@
 package org.scoula.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.scoula.dto.HouseListDTO;
 import org.scoula.dto.UserFavoriteDTO;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class UserFavoriteService {
@@ -75,20 +76,28 @@ public class UserFavoriteService {
         }
     }
 
-//
-public List<HouseListDTO> getFavoriteHouses(int usersIdx) {
-    List<UserFavoriteDTO> favorites = mapper.findFavoritesByUsersIdx(usersIdx);
-    List<HouseListDTO> result = new ArrayList<>();
+    public List<HouseListDTO> getFavoriteHouses(int usersIdx) {
+        List<UserFavoriteDTO> favorites = mapper.findFavoritesByUsersIdx(usersIdx);
+        List<HouseListDTO> result = new ArrayList<>();
 
-    for (UserFavoriteDTO fav : favorites) {
-        if (fav.getAptPblanc() != null) {
-            result.addAll(mapper.findAptHouseByPblancNo(fav.getAptPblanc()));
+        for (UserFavoriteDTO fav : favorites) {
+            if (fav.getAptPblanc() != null) {
+                List<HouseListDTO> aptList = mapper.findAptHouseByPblancNo(fav.getAptPblanc());
+                for (HouseListDTO dto : aptList) {
+                    dto.setFavoriteCount(mapper.countFavoritesByPblancNo(dto.getPblancNo()));
+                }
+                result.addAll(aptList);
+            }
+            if (fav.getOfficePblanc() != null) {
+                List<HouseListDTO> offList = mapper.findOfficetelHouseByPblancNo(fav.getOfficePblanc());
+                for (HouseListDTO dto : offList) {
+                    dto.setFavoriteCount(mapper.countFavoritesByPblancNo(dto.getPblancNo()));
+                }
+                result.addAll(offList);
+            }
         }
-        if (fav.getOfficePblanc() != null) {
-            result.addAll(mapper.findOfficetelHouseByPblancNo(fav.getOfficePblanc()));
-        }
+
+        return result;
     }
 
-    return result;
-    }
 }

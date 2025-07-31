@@ -27,4 +27,7 @@ public interface UserFavoriteMapper {
     List<HouseListDTO> findOfficetelHouseByPblancNo(@Param("pblancNo") String pblancNo);
 
     List<UserFavoriteDTO> findFavoritesByUsersIdx(@Param("usersIdx") int usersIdx);
+
+    int countFavoritesByPblancNo(@Param("pblancNo") String pblancNo);
+
 }

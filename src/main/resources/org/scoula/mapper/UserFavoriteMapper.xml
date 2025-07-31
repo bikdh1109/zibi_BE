@@ -76,5 +76,10 @@
         FROM user_favorite
         WHERE users_idx = #{usersIdx}
     </select>
+    <select id="countFavoritesByPblancNo" resultType="int">
+        SELECT COUNT(*)
+        FROM user_favorite
+        WHERE apt_pblanc = #{pblancNo} OR office_pblanc = #{pblancNo}
+    </select>
 
 </mapper>
