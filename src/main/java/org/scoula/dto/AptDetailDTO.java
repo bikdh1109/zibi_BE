@@ -144,4 +144,6 @@ public class AptDetailDTO {
 
     @JsonProperty("apt_type")
     private List<AptTypeDTO> aptType;
+
+    private List<InfraPlaceDTO> infraPlaces;
 }

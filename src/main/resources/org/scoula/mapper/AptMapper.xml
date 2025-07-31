@@ -369,6 +369,15 @@
         WHERE latitude IS NOT NULL
           AND longitude IS NOT NULL
     </select>
+    <select id="findAptIdxByPblancNo" resultType="java.lang.Integer">
+        SELECT apt_idx
+        FROM apt_table
+        WHERE pblanc_no = #{pblancNo}
+    </select>
+    <select id="getInfraPlace" resultType="org.scoula.dto.InfraPlaceDTO">
+        SELECT place_type, place_idx, place_name, distance, road_address_name
+        FROM vw_infra_places WHERE apt_idx = #{aptIdx}
+    </select>
 
 
 </mapper>
