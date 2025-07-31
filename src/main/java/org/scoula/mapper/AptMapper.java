@@ -22,4 +22,5 @@ public interface AptMapper {
     OfficetelDetailDTO getOfficetelDetails(String pblanc_no);
 
     List<AptDTO> findAllAptLocations();
+    List<OfficetelDTO> findAllOfficetelLocations();
 }
