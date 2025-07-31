@@ -392,5 +392,15 @@
         WHERE pblanc_no = #{pblancNo}
     </select>
 
+    <select id="findAllOfficetelLocations" resultType="org.scoula.dto.OfficetelDTO">
+        SELECT
+            officetel_idx AS officetelIdx,
+            latitude,
+            longitude
+        FROM officetel_table
+        WHERE latitude IS NOT NULL
+          AND longitude IS NOT NULL
+    </select>
+
 
 </mapper>

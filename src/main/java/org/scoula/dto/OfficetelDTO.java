@@ -86,6 +86,11 @@ public class OfficetelDTO {
 
     @JsonProperty("PBLANC_URL")
     private String pblancUrl;
+
+    private Integer officetelIdx;
+
+    private Double latitude;
+    private Double longitude;
 }
 
 

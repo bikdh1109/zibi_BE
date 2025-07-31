@@ -17,10 +17,10 @@ class KakaoMapInfraServiceTest {
     private KakaoMapInfraService kakaoMapInfraService;
 
     @Test
-    void fetchAndSavePlacesForAllApts() {
+    void fetchAndSavePlacesForAll() {
 
-        log.info("Starting fetchAndSavePlacesForAllApts test");
-        kakaoMapInfraService.fetchAndSavePlacesForAllApts();
-        log.info("Finished fetchAndSavePlacesForAllApts test");
+        log.info("Starting test");
+        kakaoMapInfraService.fetchAndSavePlacesForAll();
+        log.info("Finished test");
     }
 }
