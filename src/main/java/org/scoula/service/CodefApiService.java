@@ -233,4 +233,18 @@ public class CodefApiService {
     private String getSafe(JsonObject obj, String key) {
         return obj.has(key) ? obj.get(key).getAsString() : "";
     }
+
+    public boolean deleteAccountByUserIdx(int userIdx) {
+        try {
+            ChungyakAccountDTO account = accountMapper.findAccountByUserIdx(userIdx);
+            if (account == null) {
+                return false;
+            }
+            accountMapper.deleteAccountByUserIdx(userIdx);
+            return true;
+        } catch (Exception e) {
+            log.error("계좌 삭제 중 오류", e);
+            throw new RuntimeException("계좌 삭제 실패", e);
+        }
+    }
 }
