@@ -374,9 +374,22 @@
         FROM apt_table
         WHERE pblanc_no = #{pblancNo}
     </select>
+
     <select id="getInfraPlace" resultType="org.scoula.dto.InfraPlaceDTO">
         SELECT place_type, place_idx, place_name, distance, road_address_name
         FROM vw_infra_places WHERE apt_idx = #{aptIdx}
+    </select>
+
+    <select id="getOfficetelInfraPlace" resultType="org.scoula.dto.InfraPlaceDTO">
+        SELECT place_type, place_idx, place_name, distance, road_address_name
+        FROM vw_infra_places WHERE officetel_idx = #{officetelIdx}
+    </select>
+
+
+    <select id="findOfficetelIdxByPblancNo" resultType="java.lang.Integer">
+        SELECT officetel_idx
+        FROM officetel_table
+        WHERE pblanc_no = #{pblancNo}
     </select>
 
 

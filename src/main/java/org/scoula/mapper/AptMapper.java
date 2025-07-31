@@ -21,8 +21,10 @@ public interface AptMapper {
     AptDetailDTO getAptDetails(String pblanc_no);
     OfficetelDetailDTO getOfficetelDetails(String pblanc_no);
     int findAptIdxByPblancNo(@Param("pblancNo") String pblancNo);
+    int findOfficetelIdxByPblancNo(@Param("pblancNo") String pblancNo);
     List<AptDTO> findAllAptLocations();
     int incrementAptViewCount(@Param("pblancNo") String pblancNo);
     List<InfraPlaceDTO> getInfraPlace(@Param("aptIdx") int aptIdx);
+    List<InfraPlaceDTO> getOfficetelInfraPlace(@Param("officetelIdx") int officetelIdx);
 
 }

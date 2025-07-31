@@ -2,11 +2,14 @@ package org.scoula.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
 @Data
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class OfficetelDetailDTO {
     private String houseManageNo;
     private String pblancNo;
@@ -38,4 +41,5 @@ public class OfficetelDetailDTO {
     private String mvnPrearngeYm;
     private String pblancUrl;
     private List<OfficetelTypeDTO> officetelType;
+    private List<InfraPlaceDTO> infraPlaces;
 }
