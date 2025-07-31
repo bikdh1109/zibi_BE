@@ -17,5 +17,8 @@ public interface AccountMapper {
     ChungyakAccountDTO findAccountByUserIdx(@Param("userIdx") int userIdx);
 
     LocalDate findAccountStartDate(@Param("userIdx") int userIdx);
+
+    void deleteAccountByUserIdx(@Param("userIdx") int userIdx);
+
 }
 

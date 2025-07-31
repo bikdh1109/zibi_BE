@@ -87,4 +87,38 @@ public class AccountController {
         }
     }
 
+    @DeleteMapping("")
+    @ApiOperation(value = "청약 계좌 삭제", notes = "사용자의 청약 계좌를 삭제합니다.")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "계좌 삭제 성공"),
+            @ApiResponse(code = 404, message = "등록된 계좌 없음"),
+            @ApiResponse(code = 500, message = "서버 오류")
+    })
+    public ResponseEntity<Map<String, String>> deleteUserAccount(
+            @ApiParam(hidden = true) @RequestHeader("Authorization") String token
+    ) {
+        try {
+            String userId = jwtProcessor.getUsername(token.replace("Bearer ", ""));
+            int userIdx = userMapper.findUserIdxByUserId(userId);
+
+            boolean deleted = codefApiService.deleteAccountByUserIdx(userIdx);
+
+            if (deleted) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "계좌가 성공적으로 삭제되었습니다.");
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "삭제할 계좌가 존재하지 않습니다.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+        } catch (Exception e) {
+            log.error("계좌 삭제 실패", e);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "계좌 삭제 중 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
 }
