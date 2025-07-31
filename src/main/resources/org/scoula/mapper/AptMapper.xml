@@ -275,6 +275,12 @@
                              subscrpt_reqst_amount = VALUES(subscrpt_reqst_amount),
                              tp = VALUES(tp);
     </insert>
+    <update id="incrementOfficetelViewCount">
+        UPDATE officetel_table
+        SET view_count = view_count + 1
+        WHERE pblanc_no = #{pblancNo}
+    </update>
+
 
     <delete id="deleteOldFromOfficetel" parameterType="java.time.LocalDate">
         DELETE FROM officetel_table
@@ -296,6 +302,7 @@
 
     <resultMap id="officetelDetailMap" type="org.scoula.dto.OfficetelDetailDTO">
         <id property="pblancNo" column="pblanc_no"/>
+        <result property="viewCount" column="view_count"/>
         <result property="houseManageNo" column="house_manage_no"/>
         <result property="houseNm" column="house_nm"/>
         <result property="houseSecd" column="house_secd"/>
@@ -323,6 +330,7 @@
 
     <select id="getOfficetelDetails" resultMap="officetelDetailMap">
         SELECT
+            ot.view_count,
             ot.house_manage_no,
             ot.pblanc_no,
             ot.house_nm,

@@ -205,7 +205,7 @@ public class AptService {
     public void incrementAptViewCount(String pblancNo) {
         int updated = aptMapper.incrementAptViewCount(pblancNo);
         if (updated == 0) {
-            throw new IllegalArgumentException("존재하지 않는 공고번호입니다: " + pblancNo);
+            throw new IllegalArgumentException("존재하지 않는 공고번호 입니다: " + pblancNo);
         }
     }
 

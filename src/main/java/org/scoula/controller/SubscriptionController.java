@@ -92,6 +92,7 @@ public class SubscriptionController {
     public ResponseEntity<?> getOfficetelDetail(@ApiParam(value = "오피스텔 공고번호", example = "2025950040", required = true)
                                                     @RequestParam("pblanc_no") String pblancNo) {
         try {
+            officetelService.incrementOfficeViewCount(pblancNo);
             OfficetelDetailDTO detail = officetelService.getOfficetelDetail(pblancNo);
             return ResponseEntity.ok(detail);
         } catch (IllegalArgumentException e) {

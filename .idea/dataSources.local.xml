@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="dataSourceStorageLocal" created-in="IU-251.27812.49">
-    <data-source name="zibi" uuid="c278ffe3-7bc2-42c7-84db-19a3c0ee1cdb">
+    <data-source name="zibi" uuid="0c600d1f-0531-4355-b89d-02432125bdad">
       <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="MYSQL" />
       <schema-mapping />
     </data-source>
