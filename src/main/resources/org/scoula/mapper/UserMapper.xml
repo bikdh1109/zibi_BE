@@ -53,6 +53,11 @@
         SET password = #{password}
         WHERE user_id = #{userId}
     </update>
+    <update id="resetPassword">
+        UPDATE users
+        SET password = #{newPassword}
+        WHERE user_id = #{userId}
+    </update>
 
 
     <!-- 사용자 삭제 -->

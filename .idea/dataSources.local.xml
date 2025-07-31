@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="dataSourceStorageLocal" created-in="IU-243.26053.27">
-    <data-source name="@3.34.64.47" uuid="ebeeca1c-b735-45ab-bc46-8c3fe3933121">
+  <component name="dataSourceStorageLocal" created-in="IU-243.24978.46">
+    <data-source name="zibi" uuid="c278ffe3-7bc2-42c7-84db-19a3c0ee1cdb">
       <database-info product="MySQL" version="8.0.42-0ubuntu0.24.04.2" jdbc-version="4.2" driver-name="MySQL Connector/J" driver-version="mysql-connector-j-8.2.0 (Revision: 06a1f724497fd81c6a659131fda822c9e5085b6c)" dbms="MYSQL" exact-version="8.0.42" exact-driver-version="8.2">
         <extra-name-characters>#@</extra-name-characters>
         <identifier-quote-string>`</identifier-quote-string>
@@ -12,10 +12,9 @@
       <user-name>admin</user-name>
       <schema-mapping>
         <introspection-scope>
-          <node kind="schema" negative="1" />
+          <node kind="schema" qname="zibi" />
         </introspection-scope>
       </schema-mapping>
-      <load-sources>user_and_system_sources</load-sources>
     </data-source>
   </component>
 </project>

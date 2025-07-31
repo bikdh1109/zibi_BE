@@ -1,13 +1,20 @@
 package org.scoula.controller;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.scoula.dto.FavoriteRequestDTO;
 import org.scoula.dto.UserFavoriteDTO;
+import org.scoula.dto.swagger.Auth.SwaggerPasswordChangeRequestDTO;
 import org.scoula.mapper.UserMapper;
 import org.scoula.security.account.mapper.UserDetailsMapper;
 import org.scoula.security.util.JwtProcessor;
 import org.scoula.service.UserFavoriteService;
+import org.scoula.service.UserService;
+import org.scoula.util.TokenUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +29,8 @@ public class UserFavoriteController {
     private final UserMapper userMapper;
     private final UserFavoriteService userFavoriteService;
     private final JwtProcessor jwtProcessor;
+    private final TokenUtils tokenUtils;
+    private final UserService userService;
     public static final String BEARER_PREFIX = "Bearer ";
 
     // 즐겨찾기 추가
@@ -65,4 +74,5 @@ public class UserFavoriteController {
         return success ? ResponseEntity.ok("즐겨찾기 삭제 완료") :
                 ResponseEntity.badRequest().body("삭제 실패");
     }
+
 }

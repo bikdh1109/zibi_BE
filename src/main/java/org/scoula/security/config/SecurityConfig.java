@@ -105,10 +105,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()//경로별접근권한설정
                 .antMatchers(HttpMethod.OPTIONS,"/**").permitAll()
-                .antMatchers("/v1/account/**").permitAll()
+                .antMatchers("/v1/auth/refresh", "/v1/auth/signup","/v1/auth/resetpassword").permitAll()
+                .antMatchers("/v1/auth/logout","/v1/auth/signout","/v1/auth/update").hasRole("MEMBER")
+                .antMatchers("/v1/account/**").hasRole("MEMBER")
                 .antMatchers("/v1/email/**").permitAll()
-                .antMatchers("/v1/auth/**").permitAll()
-                .antMatchers("/v1/subscriptions/**").permitAll()
+                .antMatchers("/v1/subscriptions/**").hasRole("MEMBER")
                 .antMatchers("/oauth/kakao/**").permitAll()
                 .anyRequest().authenticated(); //나머지는로그인된경우모두허용
 
@@ -140,16 +141,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth)
             throws Exception {
         log.info("configure .........................................");
-//        auth.inMemoryAuthentication()
-//                .withUser("admin")
-//                .password("{noop}1234")
-//                .password("$2a$10$LZPNr9RNYysU/eFm3Ej7guTjw18kR4y92IknxnWA1BNL3dkIc8jYC")
-//                .roles("ADMIN","MEMBER"); // ROLE_ADMIN
-//        auth.inMemoryAuthentication()
-//                .withUser("member")
-//                .password("{noop}1234")
-//                .password("$2a$10$PA5ouTzqbVX3y/MZ8tdcYugIv6IRk3/b9EqUOXIm4X/gXI562FG0e")
-//                .roles("MEMBER"); // ROLE_MEMBER
 
         auth
                 .userDetailsService(userDetailsService)

@@ -1,4 +1,4 @@
-package org.scoula.dto.swagger;
+package org.scoula.dto.swagger.Auth;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

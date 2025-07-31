@@ -3,6 +3,7 @@ package org.scoula.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.scoula.dto.swagger.Auth.SwaggerPasswordResetRequestDTO;
 import org.scoula.security.dto.AuthDTO;
 import org.scoula.security.dto.MemberDTO;
 
@@ -24,4 +25,6 @@ public interface UserMapper {
     void insertUserAuth(@Param("usersIdx") Long usersIdx);
     void insertAuth(AuthDTO authDTO);
     int updatePasswordByUsername(MemberDTO member);
+
+    int resetPassword(SwaggerPasswordResetRequestDTO request);
 }

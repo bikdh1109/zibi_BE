@@ -3,6 +3,7 @@ package org.scoula.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.scoula.dto.GaScoreDTO;
+import org.scoula.dto.swagger.GaScore.SwaggerGaScoreRequest;
 import org.scoula.mapper.AccountMapper;
 import org.scoula.mapper.GaScoreMapper;
 import org.scoula.mapper.UserMapper;
@@ -26,7 +27,7 @@ public class GaScoreService {
     private final TokenUtils tokenUtils;
     private final JwtProcessor jwtProcessor; // JWT 파싱용
 
-    public GaScoreDTO saveGaScore(GaScoreDTO dto, HttpServletRequest request) {
+    public GaScoreDTO saveGaScore(SwaggerGaScoreRequest reqeustDTO, HttpServletRequest request) {
         // 1. 헤더에서 토큰 추출
         String bearerToken = request.getHeader("Authorization");
         String accessToken = tokenUtils.extractAccessToken(bearerToken);
@@ -35,37 +36,37 @@ public class GaScoreService {
         String userId = jwtProcessor.getUsername(accessToken);
         int userIdx = userMapper.findUserIdxByUserId(userId);
 
-        // 3. 날짜 필드 조건 처리
-        if (dto.getHouseDisposal() == 0) {
-            dto.setDisposalDate(null);
-        }
-        if (dto.getMaritalStatus() == 0) {
-            dto.setWeddingDate(null);
-        }
-
-        // 4. 점수 계산
-        int noHouseScore = Math.min(dto.getNoHousePeriod() * 2, 32);
-        int dependentsScore = Math.min((dto.getDependentsNm() + 1) * 5, 35);
-
+        // 3. 점수 계산
+        int noHouseScore = Math.min(reqeustDTO.getNoHousePeriod() * 2, 32);
+        int dependentsScore = Math.min((reqeustDTO.getDependentsNm() + 1) * 5, 35);
         int paymentPeriod = calculatePaymentPeriod(userIdx);
         int paymentPeriodScore = calculatePaymentPeriodScore(paymentPeriod);
-
         int totalScore = noHouseScore + dependentsScore + paymentPeriodScore;
 
-        // 5. DTO에 결과 세팅
-        dto.setNoHouseScore(noHouseScore);
-        dto.setDependentsScore(dependentsScore);
-        dto.setPaymentPeriod(paymentPeriod);
-        dto.setPaymentPeriodScore(paymentPeriodScore);
-        dto.setTotalGaScore(totalScore);
+        // 4. DTO 생성 (Builder 사용)
+        GaScoreDTO responseDTO = GaScoreDTO.builder()
+                .noHousePeriod(reqeustDTO.getNoHousePeriod())
+                .noHouseScore(noHouseScore)
+                .dependentsNm(reqeustDTO.getDependentsNm())
+                .dependentsScore(dependentsScore)
+                .paymentPeriod(paymentPeriod)
+                .paymentPeriodScore(paymentPeriodScore)
+                .maritalStatus(reqeustDTO.getMaritalStatus())
+                .weddingDate(reqeustDTO.getMaritalStatus() == 1 ? LocalDate.parse(reqeustDTO.getWeddingDate()) : null)
+                .houseDisposal(reqeustDTO.getHouseDisposal())
+                .disposalDate(reqeustDTO.getHouseDisposal() == 1 ? LocalDate.parse(reqeustDTO.getDisposalDate()) : null)
+                .houseOwner(reqeustDTO.getHouseOwner())
+                .headOfHousehold(reqeustDTO.getHeadOfHousehold())
+                .totalGaScore(totalScore)
+                .build();
 
-        // 6. DB 저장
-        gaScoreMapper.insertGaScore(dto, userIdx);
-
+        // 5. DB 저장
+        gaScoreMapper.insertGaScore(responseDTO, userIdx);
         log.info("사용자 {} 청약 가점 저장 완료: totalScore={}", userIdx, totalScore);
 
-        return dto;
+        return responseDTO;
     }
+
 
     // AccountMapper 활용해서 계좌 개설일 조회
     private int calculatePaymentPeriod(int userIdx) {
