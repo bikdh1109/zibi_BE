@@ -1,6 +1,7 @@
 package org.scoula.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -9,6 +10,10 @@ import java.util.List;
 
 @Data
 public class AptDetailDTO {
+    @JsonIgnore
+    private Integer aptIdx;
+    @JsonProperty ("favorite_count")
+    private Integer favoriteCount;
     @JsonProperty("view_count")
     private Integer viewCount;
 
