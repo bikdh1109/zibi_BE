@@ -67,5 +67,8 @@
         WHERE user_idx = #{userIdx}
     </select>
 
+    <delete id="deleteAccountByUserIdx">
+        DELETE FROM account WHERE user_idx = #{userIdx}
+    </delete>
 
 </mapper>
