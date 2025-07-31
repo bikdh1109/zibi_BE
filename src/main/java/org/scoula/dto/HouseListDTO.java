@@ -27,4 +27,6 @@ public class HouseListDTO {
     private String minPrice;
     @JsonProperty("max_price")
     private String maxPrice;
+    @JsonProperty("is_favorite")
+    private boolean isFavorite;
 }
