@@ -34,8 +34,18 @@ public class UserSelectedController {
     }
 
     @GetMapping
-    public UserSelectedDTO getUserSelected(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> getUserSelected(@RequestHeader("Authorization") String token) {
         String userId = extractUserIdFromToken(token);
-        return userSelectedService.getUserSelected(userId);
+
+        UserSelectedDTO userSelected = userSelectedService.getUserSelected(userId);
+
+        if (userSelected == null) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "사용자 선호 정보가 존재하지 않습니다.");
+            return ResponseEntity.status(404).body(response);
+        }
+
+        return ResponseEntity.ok(userSelected);
     }
+
 }
