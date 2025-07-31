@@ -145,6 +145,7 @@
 
     <resultMap id="aptDetailMap" type="org.scoula.dto.AptDetailDTO">
         <id property="pblancNo" column="pblanc_no"/>
+        <result property="viewCount" column="view_count"/>
         <result property="houseManageNo" column="house_manage_no"/>
         <result property="houseNm" column="house_nm"/>
         <result property="houseSecd" column="house_secd"/>
@@ -184,6 +185,12 @@
         <result property="pblancUrl" column="pblanc_url"/>
         <collection property="aptType" resultMap="aptTypeMap"/>
     </resultMap>
+
+    <update id="incrementAptViewCount">
+        UPDATE apt_table
+        SET view_count = view_count + 1
+        WHERE pblanc_no = #{pblancNo}
+    </update>
 
 
     <select id="getAptDetails" resultMap="aptDetailMap">
@@ -226,6 +233,7 @@
             a.mdat_trget_area_secd,
             a.parcprc_uls_at,
             a.pblanc_url,
+            a.view_count,
 
             t.house_ty,
             t.suply_ar,

@@ -43,13 +43,10 @@ public class SubscriptionController {
     })
     public ResponseEntity<?> getHousingList(@ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken) {
         try {
-            // 1. 토큰에서 AccessToken 추출
+
             String accessToken = tokenUtils.extractAccessToken(bearerToken);
-            // 2. 토큰에서 user_id(email) 추출
             String userId = jwtProcessor.getUsername(accessToken);
-            // 3. user_id로 user_idx 조회
             int userIdx = userMapper.findUserIdxByUserId(userId);
-            // 4. 전체 공고 + 즐겨찾기 여부 포함하여 조회
             List<HouseListDTO> list = houseService.getAllHousingList(userIdx);
             return ResponseEntity.ok(list);
 
@@ -70,9 +67,9 @@ public class SubscriptionController {
             @ApiResponse(code = 401, message = "인증 실패"),
             @ApiResponse(code = 500, message = "서버 오류")
     })
-    public ResponseEntity<?> getApartmentDetail(    @ApiParam(value = "아파트 공고번호", example = "2025000306", required = true)
-                                                        @RequestParam("pblanc_no") String pblancNo) {
+    public ResponseEntity<?> getApartmentDetail(@ApiParam(value = "아파트 공고번호", example = "2025000306", required = true) @RequestParam("pblanc_no") String pblancNo) {
         try {
+            aptService.incrementAptViewCount(pblancNo);
             AptDetailDTO detail = aptService.getAptDetail(pblancNo);
             return ResponseEntity.ok(detail);
         } catch (IllegalArgumentException e) {

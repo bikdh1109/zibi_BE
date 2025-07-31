@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -197,6 +198,12 @@ public class AptService {
         }
     }
 
-
+    @Transactional
+    public void incrementAptViewCount(String pblancNo) {
+        int updated = aptMapper.incrementAptViewCount(pblancNo);
+        if (updated == 0) {
+            throw new IllegalArgumentException("존재하지 않는 공고번호입니다: " + pblancNo);
+        }
+    }
 
 }
