@@ -141,9 +141,9 @@ public class AptDTO {
     @JsonProperty("PBLANC_URL")
     private String pblancUrl;
 
-    private Long latitude;
+    private Double latitude;
 
-    private Long longitude;
+    private Double longitude;
 
     private int aptIdx;
 }
