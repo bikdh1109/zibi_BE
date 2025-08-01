@@ -44,7 +44,6 @@ public class UserSelectedController {
             response.put("message", "사용자 선호 정보가 존재하지 않습니다.");
             return ResponseEntity.status(404).body(response);
         }
-
         return ResponseEntity.ok(userSelected);
     }
 
