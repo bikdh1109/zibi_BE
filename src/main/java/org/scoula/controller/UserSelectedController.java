@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -52,13 +53,20 @@ public class UserSelectedController {
             @ApiResponse(code = 404, message = "선호 정보 없음")
     })
 
-    public ResponseEntity<UserSelectedDTO> getUserSelected(
-            @ApiParam(hidden = true) @RequestHeader("Authorization") String token
-    ) {
+    public ResponseEntity<?> getUserRecommendations(@RequestHeader("Authorization") String token) {
         String userId = extractUserIdFromToken(token);
-        UserSelectedDTO dto = userSelectedService.getUserSelected(userId);
-        return ResponseEntity.ok(dto);
 
+        UserSelectedDTO preferences = userSelectedService.getUserSelected(userId);
+        if (preferences == null) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "사용자 선호 정보가 존재하지 않습니다.");
+            return ResponseEntity.status(404).body(response);
+        }
+
+        // 공고 조회만 수행
+        List<Map<String, Object>> listings = userSelectedService.getRecommendedNotices(preferences);
+
+        return ResponseEntity.ok(listings);
     }
 
 }

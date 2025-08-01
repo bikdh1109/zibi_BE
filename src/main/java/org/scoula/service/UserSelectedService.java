@@ -8,7 +8,9 @@ import org.scoula.mapper.UserMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -54,4 +56,30 @@ public class UserSelectedService {
 
         return new UserSelectedDTO(homePrice, regions, homesizes, hometypes);
     }
+
+    public List<Map<String, Object>> getRecommendedNotices(String userId) {
+        int usersIdx = userMapper.findUserIdxByUserId(userId);
+        int userInfoIdx = selectedMapper.findUserInfoIdxByUserIdx(usersIdx);
+
+        // 사용자 선호 조건 조회
+        HomePriceDTO homePrice = selectedMapper.selectHomePriceByUserIdx(usersIdx);
+        List<RegionDTO> regions = selectedMapper.selectSelectedRegion(userInfoIdx);
+        List<HomeSizeDTO> homesizes = selectedMapper.selectSelectedHomesize(userInfoIdx);
+        List<HomeTypeDTO> hometypes = selectedMapper.selectSelectedHometype(userInfoIdx);
+
+        List<Map<String, Object>> combined = new ArrayList<>();
+
+        // homeType 값에 따라 테이블 분기
+        for (HomeTypeDTO homeType : hometypes) {
+            if ("아파트".equals(homeType.getSelectedHouseSecd())) {
+                combined.addAll(selectedMapper.findAptNotices(homePrice, regions, homesizes, hometypes));
+            }
+            if ("오피스텔".equals(homeType.getSelectedHouseSecd()) || "도시형생활주택".equals(homeType.getSelectedHouseSecd())) {
+                combined.addAll(selectedMapper.findOfficetelNotices(homePrice, regions, homesizes, hometypes));
+            }
+        }
+
+        return combined;
+    }
+
 }

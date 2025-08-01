@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import org.scoula.dto.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface SelectedMapper {
@@ -25,4 +26,15 @@ public interface SelectedMapper {
     List<RegionDTO> selectSelectedRegion(int userInfoIdx);
     List<HomeSizeDTO> selectSelectedHomesize(int userInfoIdx);
     List<HomeTypeDTO> selectSelectedHometype(int userInfoIdx);
+
+    List<Map<String, Object>> findAptNotices(@Param("homePrice") HomePriceDTO homePrice,
+                                             @Param("regions") List<RegionDTO> regions,
+                                             @Param("homesizes") List<HomeSizeDTO> homesizes,
+                                             @Param("hometypes") List<HomeTypeDTO> hometypes);
+
+    List<Map<String, Object>> findOfficetelNotices(@Param("homePrice") HomePriceDTO homePrice,
+                                                   @Param("regions") List<RegionDTO> regions,
+                                                   @Param("homesizes") List<HomeSizeDTO> homesizes,
+                                                   @Param("hometypes") List<HomeTypeDTO> hometypes);
+}
 }

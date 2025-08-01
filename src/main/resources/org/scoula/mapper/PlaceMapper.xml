@@ -86,4 +86,82 @@
     <delete id="truncateSubway">TRUNCATE TABLE subway;</delete>
     <delete id="truncateKindergarten">TRUNCATE TABLE kindergarten;</delete>
 
+    <!-- 아파트 공고 조회 -->
+    <select id="findAptNotices" resultType="map">
+        SELECT
+        a.house_mange_no AS houseMangeNo,
+        a.house_nm       AS houseNm,
+        a.house_secd_nm  AS houseSecdNm,
+        a.si             AS si,
+        a.sigungu        AS sigungu,
+        a.rcept_bgnde    AS rceptBgnde,
+        a.rcept_endde    AS rceptEndde
+        FROM apt_table a
+        WHERE 1=1
+        <if test="homePrice != null and homePrice.hopeMinPrice != null">
+            AND a.price &gt;= #{homePrice.hopeMinPrice}
+        </if>
+        <if test="homePrice != null and homePrice.hopeMaxPrice != null">
+            AND a.price &lt;= #{homePrice.hopeMaxPrice}
+        </if>
+        <if test="regions != null and regions.size() &gt; 0">
+            AND a.si IN
+            <foreach item="region" collection="regions" open="(" separator="," close=")">
+                #{region.si}
+            </foreach>
+        </if>
+        <if test="homesizes != null and homesizes.size() &gt; 0">
+            AND a.size IN
+            <foreach item="hs" collection="homesizes" open="(" separator="," close=")">
+                #{hs.size}
+            </foreach>
+        </if>
+        <if test="hometypes != null and hometypes.size() &gt; 0">
+            AND a.house_secd_nm IN
+            <foreach item="ht" collection="hometypes" open="(" separator="," close=")">
+                #{ht.type}
+            </foreach>
+        </if>
+    </select>
+
+
+    <!-- 오피스텔 공고 조회 -->
+    <select id="findOfficetelNotices" resultType="map">
+        SELECT
+        o.house_mange_no AS houseMangeNo,
+        o.house_nm       AS houseNm,
+        o.house_secd_nm  AS houseSecdNm,
+        o.si             AS si,
+        o.sigungu        AS sigungu,
+        o.rcept_bgnde    AS rceptBgnde,
+        o.rcept_endde    AS rceptEndde
+        FROM officetel_table o
+        WHERE 1=1
+        <if test="homePrice != null and homePrice.hopeMinPrice != null">
+            AND o.price &gt;= #{homePrice.hopeMinPrice}
+        </if>
+        <if test="homePrice != null and homePrice.hopeMaxPrice != null">
+            AND o.price &lt;= #{homePrice.hopeMaxPrice}
+        </if>
+        <if test="regions != null and regions.size() &gt; 0">
+            AND o.si IN
+            <foreach item="region" collection="regions" open="(" separator="," close=")">
+                #{region.si}
+            </foreach>
+        </if>
+        <if test="homesizes != null and homesizes.size() &gt; 0">
+            AND o.size IN
+            <foreach item="hs" collection="homesizes" open="(" separator="," close=")">
+                #{hs.size}
+            </foreach>
+        </if>
+        <if test="hometypes != null and hometypes.size() &gt; 0">
+            AND o.house_secd_nm IN
+            <foreach item="ht" collection="hometypes" open="(" separator="," close=")">
+                #{ht.type}
+            </foreach>
+        </if>
+    </select>
+
+
 </mapper>
