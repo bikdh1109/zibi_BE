@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/v1/ga-score")
 @RequiredArgsConstructor
-@Api(tags = "가점API", description = "사용자 설문 기반 가점 계산 및 저장")
+@Api(tags = "가점 API", description = "사용자 설문 기반 가점 계산 및 저장")
 public class GaScoreController {
 
     private final GaScoreService gaScoreService;
