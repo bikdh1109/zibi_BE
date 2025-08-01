@@ -19,7 +19,7 @@ public class SwaggerGaScoreRequest {
     @JsonProperty("house_disposal")
     private int houseDisposal;
 
-    @ApiModelProperty(value = "주택 처분일 (null 허용)", example = "null")
+    @ApiModelProperty(value = "주택 처분일 (yyyy-MM, null 허용)", example = "null")
     @JsonProperty("disposal_date")
     private String disposalDate;
 
@@ -27,7 +27,7 @@ public class SwaggerGaScoreRequest {
     @JsonProperty("marital_status")
     private int maritalStatus;
 
-    @ApiModelProperty(value = "혼인 날짜 (yyyy-MM-dd)", example = "2015-05-04", required = true)
+    @ApiModelProperty(value = "혼인 날짜 (yyyy-MM, null 허용)", example = "2015-05")
     @JsonProperty("wedding_date")
     private String weddingDate;
 
