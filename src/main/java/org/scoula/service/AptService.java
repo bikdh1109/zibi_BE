@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -186,11 +187,18 @@ public class AptService {
     public AptDetailDTO getAptDetail(String pblancNo) {
         try {
             AptDetailDTO dto = aptMapper.getAptDetails(pblancNo);
-            if (dto == null) {
+
+            if (dto == null || dto.getAptIdx() == null || dto.getAptIdx() == 0) {
                 log.warn("해당 공고번호 [{}]에 대한 청약 정보가 존재하지 않습니다.", pblancNo);
                 throw new IllegalArgumentException("해당 공고에 대한 정보가 존재하지 않습니다.");
             }
+
+            // 이제 따로 쿼리 없이 바로 사용 가능
+            List<InfraPlaceDTO> infraPlaces = aptMapper.getInfraPlace(dto.getAptIdx());
+            dto.setInfraPlaces(infraPlaces);
+
             return dto;
+
         } catch (Exception e) {
             log.error("청약 공고 상세 조회 중 예외 발생. pblancNo: {}, error: {}", pblancNo, e.getMessage(), e);
             throw new IllegalStateException("청약 공고 상세 정보를 조회하는 중 오류가 발생했습니다.", e);
@@ -198,5 +206,12 @@ public class AptService {
     }
 
 
+    @Transactional
+    public void incrementAptViewCount(String pblancNo) {
+        int updated = aptMapper.incrementAptViewCount(pblancNo);
+        if (updated == 0) {
+            throw new IllegalArgumentException("존재하지 않는 공고번호 입니다: " + pblancNo);
+        }
+    }
 
 }

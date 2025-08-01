@@ -37,6 +37,7 @@ public class UserService {
         authDTO.setUsersIdx(memberDTO.getUsersIdx());
         authDTO.setAuth("ROLE_MEMBER");
         userMapper.insertAuth(authDTO);
+        userMapper.insertUserInfo(memberDTO.getUsersIdx());
     }
 
 //    @Transactional
