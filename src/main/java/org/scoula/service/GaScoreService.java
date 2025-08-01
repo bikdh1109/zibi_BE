@@ -24,26 +24,23 @@ public class GaScoreService {
 
     private final GaScoreMapper gaScoreMapper;
     private final UserMapper userMapper;
-    private final AccountMapper accountMapper; // ✅ 추가
+    private final AccountMapper accountMapper;
     private final TokenUtils tokenUtils;
-    private final JwtProcessor jwtProcessor; // JWT 파싱용
+    private final JwtProcessor jwtProcessor;
 
     public GaScoreDTO saveGaScore(SwaggerGaScoreRequest reqeustDTO, HttpServletRequest request) {
-        // 1. 토큰 처리
         String bearerToken = request.getHeader("Authorization");
         String accessToken = tokenUtils.extractAccessToken(bearerToken);
 
         String userId = jwtProcessor.getUsername(accessToken);
         int userIdx = userMapper.findUserIdxByUserId(userId);
 
-        // 2. 점수 계산
         int noHouseScore = Math.min(reqeustDTO.getNoHousePeriod() * 2, 32);
         int dependentsScore = Math.min((reqeustDTO.getDependentsNm() + 1) * 5, 35);
         int paymentPeriod = calculatePaymentPeriod(userIdx);
         int paymentPeriodScore = calculatePaymentPeriodScore(paymentPeriod);
         int totalScore = noHouseScore + dependentsScore + paymentPeriodScore;
 
-        // 3. DTO 생성
         GaScoreDTO responseDTO = GaScoreDTO.builder()
                 .noHousePeriod(reqeustDTO.getNoHousePeriod())
                 .noHouseScore(noHouseScore)
@@ -60,7 +57,6 @@ public class GaScoreService {
                 .totalGaScore(totalScore)
                 .build();
 
-        // 4. DB 저장 (문자열 그대로)
         gaScoreMapper.insertGaScore(responseDTO, userIdx);
 
         log.info("사용자 {} 청약 가점 저장 완료: totalScore={}", userIdx, totalScore);
@@ -93,7 +89,6 @@ public class GaScoreService {
 
 
 
-    // AccountMapper 활용해서 계좌 개설일 조회
     private int calculatePaymentPeriod(int userIdx) {
         LocalDate startDate = accountMapper.findAccountStartDate(userIdx);
         if (startDate == null) return 0;
