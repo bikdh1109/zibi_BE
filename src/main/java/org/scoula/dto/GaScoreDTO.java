@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 
 @Data
 @Builder
@@ -52,16 +53,15 @@ public class GaScoreDTO {
 
     //주택 처분 날짜 (처분여부가 1이면 이게 필수임 or null)
     @JsonProperty("disposal_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate disposalDate;
+    private String disposalDate;
 
     //결혼 여부 (1 or 0)
     @JsonProperty("marital_status")
     private int maritalStatus;
+
     // 결혼 1이면 결혼 날짜 0 이면 null
     @JsonProperty("wedding_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate weddingDate;
+    private String weddingDate;
 
     // 총 가점 합계
     @JsonProperty("total_ga_score")
