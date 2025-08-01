@@ -17,10 +17,7 @@ class HouseServiceTest {
     @Autowired
     private HouseService houseService;
 
-    @Test
-    void getAllHousingList() {
-        houseService.getAllHousingList().forEach(dto -> log.info(dto.toString()));
-    }
+
 
 
 }

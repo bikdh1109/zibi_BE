@@ -107,6 +107,7 @@ public class AuthController {
     }
 
 
+
     @PutMapping("/resetpassword")
     @ApiOperation(value = "비밀번호 초기화", notes = "user_id를 기반으로 비밀번호를 새 값으로 강제로 초기화합니다.")
     @ApiResponses({

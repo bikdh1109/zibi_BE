@@ -144,7 +144,11 @@
     </resultMap>
 
     <resultMap id="aptDetailMap" type="org.scoula.dto.AptDetailDTO">
+
         <id property="pblancNo" column="pblanc_no"/>
+        <result property="aptIdx" column="apt_idx"/>
+        <result property="favoriteCount" column="favorite_count"/>
+        <result property="viewCount" column="view_count"/>
         <result property="houseManageNo" column="house_manage_no"/>
         <result property="houseNm" column="house_nm"/>
         <result property="houseSecd" column="house_secd"/>
@@ -185,9 +189,16 @@
         <collection property="aptType" resultMap="aptTypeMap"/>
     </resultMap>
 
+    <update id="incrementAptViewCount">
+        UPDATE apt_table
+        SET view_count = view_count + 1
+        WHERE pblanc_no = #{pblancNo}
+    </update>
+
 
     <select id="getAptDetails" resultMap="aptDetailMap">
         SELECT
+            a.apt_idx,
             a.house_manage_no,
             a.pblanc_no,
             a.house_nm,
@@ -226,7 +237,8 @@
             a.mdat_trget_area_secd,
             a.parcprc_uls_at,
             a.pblanc_url,
-
+            a.view_count,
+            (SELECT COUNT(*) FROM user_favorite uf WHERE uf.apt_pblanc = a.pblanc_no) AS favorite_count,
             t.house_ty,
             t.suply_ar,
             t.suply_hshldco,
@@ -235,8 +247,9 @@
 
         FROM apt_table a
                  LEFT JOIN apt_type t ON a.apt_idx = t.apt_idx
-        WHERE a.pblanc_no = #{pblancNo};
+        WHERE a.pblanc_no = #{pblancNo}
     </select>
+
 
     <insert id="insertOfficetelType">
         INSERT INTO officetel_type (
@@ -267,6 +280,12 @@
                              subscrpt_reqst_amount = VALUES(subscrpt_reqst_amount),
                              tp = VALUES(tp);
     </insert>
+    <update id="incrementOfficetelViewCount">
+        UPDATE officetel_table
+        SET view_count = view_count + 1
+        WHERE pblanc_no = #{pblancNo}
+    </update>
+
 
     <delete id="deleteOldFromOfficetel" parameterType="java.time.LocalDate">
         DELETE FROM officetel_table
@@ -288,6 +307,8 @@
 
     <resultMap id="officetelDetailMap" type="org.scoula.dto.OfficetelDetailDTO">
         <id property="pblancNo" column="pblanc_no"/>
+        <result property="favoriteCount" column="favorite_count"/>
+        <result property="viewCount" column="view_count"/>
         <result property="houseManageNo" column="house_manage_no"/>
         <result property="houseNm" column="house_nm"/>
         <result property="houseSecd" column="house_secd"/>
@@ -315,6 +336,7 @@
 
     <select id="getOfficetelDetails" resultMap="officetelDetailMap">
         SELECT
+            ot.view_count,
             ot.house_manage_no,
             ot.pblanc_no,
             ot.house_nm,
@@ -345,7 +367,9 @@
             ott.suply_amount,
             ott.subscrpt_reqst_amount,
             ott.house_manage_no ,
-            ott.pblanc_no
+            ott.pblanc_no,
+        (SELECT COUNT(*) FROM user_favorite uf WHERE uf.office_pblanc = ot.pblanc_no) AS favorite_count
+
         FROM officetel_table ot
                  LEFT JOIN officetel_type ott
                            ON ot.officetel_idx = ott.officetel_idx
@@ -361,6 +385,28 @@
         WHERE latitude IS NOT NULL
           AND longitude IS NOT NULL
     </select>
+    <select id="findAptIdxByPblancNo" resultType="java.lang.Integer">
+        SELECT apt_idx
+        FROM apt_table
+        WHERE pblanc_no = #{pblancNo}
+    </select>
+
+    <select id="getInfraPlace" resultType="org.scoula.dto.InfraPlaceDTO">
+        SELECT place_type, place_idx, place_name, distance, road_address_name
+        FROM vw_infra_places WHERE apt_idx = #{aptIdx}
+    </select>
+
+    <select id="getOfficetelInfraPlace" resultType="org.scoula.dto.InfraPlaceDTO">
+        SELECT place_type, place_idx, place_name, distance, road_address_name
+        FROM vw_infra_places WHERE officetel_idx = #{officetelIdx}
+    </select>
+
+
+    <select id="findOfficetelIdxByPblancNo" resultType="java.lang.Integer">
+        SELECT officetel_idx
+        FROM officetel_table
+        WHERE pblanc_no = #{pblancNo}
+    </select>
 
     <select id="findAllOfficetelLocations" resultType="org.scoula.dto.OfficetelDTO">
         SELECT
@@ -370,6 +416,10 @@
         FROM officetel_table
         WHERE latitude IS NOT NULL
           AND longitude IS NOT NULL
+    </select>
+    <select id="countFavoritesByPblancNo" resultType="int">
+        SELECT COUNT(*) FROM user_favorite
+        WHERE apt_pblanc = #{pblancNo}
     </select>
 
 

@@ -6,14 +6,14 @@ import lombok.extern.log4j.Log4j2;
 import org.scoula.dto.AptDetailDTO;
 import org.scoula.dto.HouseListDTO;
 import org.scoula.dto.OfficetelDetailDTO;
+import org.scoula.mapper.UserMapper;
+import org.scoula.security.util.JwtProcessor;
 import org.scoula.service.AptService;
 import org.scoula.service.HouseService;
 import org.scoula.service.OfficetelService;
+import org.scoula.util.TokenUtils;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -27,21 +27,29 @@ public class SubscriptionController {
     private final HouseService houseService;
     private final AptService aptService;
     private final OfficetelService officetelService;
+    private final TokenUtils tokenUtils;
+    private final JwtProcessor jwtProcessor;
+    private final UserMapper userMapper;
 
     @GetMapping("")
     @ApiOperation(
             value = "모든 청약공고 가져오기",
-            notes = "page, pageSize 쿼리 파라미터로 페이징 처리합니다. 인증 헤더 필요"
+            notes = "user의 즐겨찾기 정보를 포함한 전체 공고 리스트를 반환합니다. 인증 헤더 필요"
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "성공", response = HouseListDTO.class, responseContainer = "List"),
             @ApiResponse(code = 401, message = "인증 실패"),
             @ApiResponse(code = 500, message = "서버 오류")
     })
-    public ResponseEntity<?> getHousingList() {
+    public ResponseEntity<?> getHousingList(@ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken) {
         try {
-            List<HouseListDTO> list = houseService.getAllHousingList();
+
+            String accessToken = tokenUtils.extractAccessToken(bearerToken);
+            String userId = jwtProcessor.getUsername(accessToken);
+            int userIdx = userMapper.findUserIdxByUserId(userId);
+            List<HouseListDTO> list = houseService.getAllHousingList(userIdx);
             return ResponseEntity.ok(list);
+
         } catch (IllegalStateException e) {
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
@@ -59,9 +67,9 @@ public class SubscriptionController {
             @ApiResponse(code = 401, message = "인증 실패"),
             @ApiResponse(code = 500, message = "서버 오류")
     })
-    public ResponseEntity<?> getApartmentDetail(    @ApiParam(value = "아파트 공고번호", example = "2025000306", required = true)
-                                                        @RequestParam("pblanc_no") String pblancNo) {
+    public ResponseEntity<?> getApartmentDetail(@ApiParam(value = "아파트 공고번호", example = "2025000306", required = true) @RequestParam("pblanc_no") String pblancNo) {
         try {
+            aptService.incrementAptViewCount(pblancNo);
             AptDetailDTO detail = aptService.getAptDetail(pblancNo);
             return ResponseEntity.ok(detail);
         } catch (IllegalArgumentException e) {
@@ -84,6 +92,7 @@ public class SubscriptionController {
     public ResponseEntity<?> getOfficetelDetail(@ApiParam(value = "오피스텔 공고번호", example = "2025950040", required = true)
                                                     @RequestParam("pblanc_no") String pblancNo) {
         try {
+            officetelService.incrementOfficeViewCount(pblancNo);
             OfficetelDetailDTO detail = officetelService.getOfficetelDetail(pblancNo);
             return ResponseEntity.ok(detail);
         } catch (IllegalArgumentException e) {

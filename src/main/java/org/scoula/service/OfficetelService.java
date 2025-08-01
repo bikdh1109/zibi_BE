@@ -10,6 +10,7 @@ import org.scoula.mapper.AptMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -209,15 +210,27 @@ public class OfficetelService {
 
     public OfficetelDetailDTO getOfficetelDetail(String pblancNo) {
         try {
+
             OfficetelDetailDTO dto = officeMapper.getOfficetelDetails(pblancNo);
-            if (dto == null) {
+            int aptIdx = officeMapper.findOfficetelIdxByPblancNo(pblancNo);
+            if (dto == null || aptIdx == 0 ) {
                 log.warn("해당 공고번호 [{}]에 대한 청약 정보가 존재하지 않습니다.", pblancNo);
                 throw new IllegalArgumentException("해당 공고에 대한 정보가 존재하지 않습니다.");
             }
+            List<InfraPlaceDTO> infraPlaces = officeMapper.getOfficetelInfraPlace(aptIdx);
+            dto.setInfraPlaces(infraPlaces);
             return dto;
         } catch (Exception e) {
             log.error("청약 공고 상세 조회 중 예외 발생. pblancNo: {}, error: {}", pblancNo, e.getMessage(), e);
             throw new IllegalStateException("청약 공고 상세 정보를 조회하는 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    @Transactional
+    public void incrementOfficeViewCount(String pblancNo) {
+        int updated = officeMapper.incrementOfficetelViewCount(pblancNo);
+        if (updated == 0 ) {
+            throw new IllegalArgumentException("존재하지 않는 공고번호 입니다."+pblancNo);
         }
     }
 

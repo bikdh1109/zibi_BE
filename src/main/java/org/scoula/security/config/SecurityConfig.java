@@ -105,12 +105,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()//경로별접근권한설정
                 .antMatchers(HttpMethod.OPTIONS,"/**").permitAll()
-                .antMatchers("/v1/auth/refresh", "/v1/auth/signup","/v1/auth/resetpassword").permitAll()
+                .antMatchers("/v1/auth/refresh", "/v1/auth/signup","/v1/auth/resetpassword","/v1/email/**","/api/oauth/kakao/**").permitAll()
+
                 .antMatchers("/v1/auth/logout","/v1/auth/signout","/v1/auth/update").hasRole("MEMBER")
                 .antMatchers("/v1/account/**").hasRole("MEMBER")
-                .antMatchers("/v1/email/**").permitAll()
+                .antMatchers("v1/me/**").hasRole("MEMBER")
                 .antMatchers("/v1/subscriptions/**").hasRole("MEMBER")
-                .antMatchers("/oauth/kakao/**").permitAll()
                 .anyRequest().authenticated(); //나머지는로그인된경우모두허용
 
 

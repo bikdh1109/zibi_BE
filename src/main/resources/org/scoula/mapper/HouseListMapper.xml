@@ -6,7 +6,18 @@
 <mapper namespace="org.scoula.mapper.HouseListMapper">
 
     <select id="getAllHouseList" resultType="org.scoula.dto.HouseListDTO">
-        SELECT * FROM vw_all_housing_list
+        SELECT
+            v.*,
+            CASE
+                WHEN uf.users_idx IS NOT NULL THEN TRUE
+                ELSE FALSE
+                END AS is_favorite
+        FROM vw_all_house_list v
+                 LEFT JOIN user_favorite uf
+                           ON v.pblanc_no = COALESCE(uf.apt_pblanc, uf.office_pblanc)
+                               AND uf.users_idx = #{userIdx}
     </select>
+
+
 
 </mapper>
