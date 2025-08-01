@@ -14,9 +14,9 @@ import java.util.List;
 public class HouseService {
     private final HouseListMapper houseListMapper;
 
-    public List<HouseListDTO> getAllHousingList() {
+    public List<HouseListDTO> getAllHousingList(int userIdx) {
         try {
-            return houseListMapper.getAllHouseList();
+            return houseListMapper.getAllHouseList(userIdx);
         } catch (Exception e) {
             log.error("청약 공고 목록 조회 중 예외 발생", e);
             throw new IllegalStateException("청약 공고 목록을 불러오는 중 오류가 발생했습니다.", e);
