@@ -47,28 +47,33 @@ public class GaScoreService {
         int noHouseScore;
         String residenceStartDate = requestDto.getResidenceStartDate();
 
+        LocalDate thirtiethBirthday = birthDate.plusYears(30);
+        LocalDate baseDate = null;
+
+        // 조건 1: 만 30세 미만 & 미혼
         if (age < 30 && requestDto.getMaritalStatus() == 0) {
             noHousePeriod = 0;
             noHouseScore = 0;
-        } else if (requestDto.getHouseOwner() == 1) {
+            residenceStartDate = null;
+        }
+        // 조건 2: 현재 주택 소유 중
+        else if (requestDto.getHouseOwner() == 1 && disposalDate == null) {
             noHousePeriod = 0;
             noHouseScore = 0;
-        } else {
-            LocalDate thirtiethBirthday = birthDate.plusYears(30);
-            LocalDate baseDate;
-
-            if (requestDto.getHouseOwner() == 0) {
+            residenceStartDate = null;
+        }
+        // 조건 3: 현재 무주택
+        else {
+            if (disposalDate != null) { // 과거 주택 소유 후 처분 이력 있음
                 if (requestDto.getMaritalStatus() == 1 && weddingDate != null) {
-                    baseDate = thirtiethBirthday.isBefore(weddingDate) ? weddingDate : thirtiethBirthday;
-                } else {
-                    baseDate = thirtiethBirthday;
-                }
-            } else {
-                if (requestDto.getMaritalStatus() == 1 && weddingDate != null && disposalDate != null) {
                     baseDate = Stream.of(thirtiethBirthday, weddingDate, disposalDate)
                             .max(LocalDate::compareTo).get();
-                } else if (disposalDate != null) {
+                } else {
                     baseDate = thirtiethBirthday.isAfter(disposalDate) ? thirtiethBirthday : disposalDate;
+                }
+            } else { // 과거 주택 소유 이력 없음
+                if (requestDto.getMaritalStatus() == 1 && weddingDate != null) {
+                    baseDate = thirtiethBirthday.isBefore(weddingDate) ? weddingDate : thirtiethBirthday;
                 } else {
                     baseDate = thirtiethBirthday;
                 }
@@ -77,7 +82,7 @@ public class GaScoreService {
             noHousePeriod = (int) ChronoUnit.YEARS.between(baseDate, LocalDate.now());
             noHouseScore = calculateNoHouseScore(noHousePeriod);
 
-            if (residenceStartDate == null) {
+            if (residenceStartDate == null && baseDate != null) {
                 residenceStartDate = baseDate.format(DateTimeFormatter.ofPattern("yyyy-MM"));
             }
         }
