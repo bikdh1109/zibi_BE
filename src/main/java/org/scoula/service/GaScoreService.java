@@ -13,9 +13,11 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -28,37 +30,84 @@ public class GaScoreService {
     private final TokenUtils tokenUtils;
     private final JwtProcessor jwtProcessor;
 
-    public GaScoreDTO saveGaScore(SwaggerGaScoreRequest reqeustDTO, HttpServletRequest request) {
+    public GaScoreDTO saveGaScore(SwaggerGaScoreRequest requestDto, HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         String accessToken = tokenUtils.extractAccessToken(bearerToken);
 
         String userId = jwtProcessor.getUsername(accessToken);
         int userIdx = userMapper.findUserIdxByUserId(userId);
 
-        int noHouseScore = Math.min(reqeustDTO.getNoHousePeriod() * 2, 32);
-        int dependentsScore = Math.min((reqeustDTO.getDependentsNm() + 1) * 5, 35);
+        LocalDate birthDate = LocalDate.parse(requestDto.getBirthDate());
+        LocalDate weddingDate = parseYearMonth(requestDto.getWeddingDate());
+        LocalDate disposalDate = parseYearMonth(requestDto.getDisposalDate());
+
+        int age = Period.between(birthDate, LocalDate.now()).getYears();
+
+        int noHousePeriod;
+        int noHouseScore;
+        String residenceStartDate = requestDto.getResidenceStartDate();
+
+        if (age < 30 && requestDto.getMaritalStatus() == 0) {
+            noHousePeriod = 0;
+            noHouseScore = 0;
+        } else if (requestDto.getHouseOwner() == 1) {
+            noHousePeriod = 0;
+            noHouseScore = 0;
+        } else {
+            LocalDate thirtiethBirthday = birthDate.plusYears(30);
+            LocalDate baseDate;
+
+            if (requestDto.getHouseOwner() == 0) {
+                if (requestDto.getMaritalStatus() == 1 && weddingDate != null) {
+                    baseDate = thirtiethBirthday.isBefore(weddingDate) ? weddingDate : thirtiethBirthday;
+                } else {
+                    baseDate = thirtiethBirthday;
+                }
+            } else {
+                if (requestDto.getMaritalStatus() == 1 && weddingDate != null && disposalDate != null) {
+                    baseDate = Stream.of(thirtiethBirthday, weddingDate, disposalDate)
+                            .max(LocalDate::compareTo).get();
+                } else if (disposalDate != null) {
+                    baseDate = thirtiethBirthday.isAfter(disposalDate) ? thirtiethBirthday : disposalDate;
+                } else {
+                    baseDate = thirtiethBirthday;
+                }
+            }
+
+            noHousePeriod = (int) ChronoUnit.YEARS.between(baseDate, LocalDate.now());
+            noHouseScore = calculateNoHouseScore(noHousePeriod);
+
+            if (residenceStartDate == null) {
+                residenceStartDate = baseDate.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            }
+        }
+
+        int dependentsScore = Math.min((requestDto.getDependentsNm() + 1) * 5, 35);
         int paymentPeriod = calculatePaymentPeriod(userIdx);
         int paymentPeriodScore = calculatePaymentPeriodScore(paymentPeriod);
         int totalScore = noHouseScore + dependentsScore + paymentPeriodScore;
 
         GaScoreDTO responseDTO = GaScoreDTO.builder()
-                .noHousePeriod(reqeustDTO.getNoHousePeriod())
+                .noHousePeriod(noHousePeriod)
                 .noHouseScore(noHouseScore)
-                .dependentsNm(reqeustDTO.getDependentsNm())
+                .dependentsNm(requestDto.getDependentsNm())
                 .dependentsScore(dependentsScore)
+                .headOfHousehold(requestDto.getHeadOfHousehold())
+                .houseOwner(requestDto.getHouseOwner())
+                .houseDisposal(requestDto.getHouseDisposal())
+                .disposalDate(disposalDate != null ?
+                        disposalDate.format(DateTimeFormatter.ofPattern("yyyy-MM")) : null)
+                .maritalStatus(requestDto.getMaritalStatus())
+                .weddingDate(weddingDate != null ?
+                        weddingDate.format(DateTimeFormatter.ofPattern("yyyy-MM")) : null)
+                .birthDate(requestDto.getBirthDate())
+                .residenceStartDate(residenceStartDate)
                 .paymentPeriod(paymentPeriod)
                 .paymentPeriodScore(paymentPeriodScore)
-                .maritalStatus(reqeustDTO.getMaritalStatus())
-                .weddingDate(reqeustDTO.getMaritalStatus() == 1 ? reqeustDTO.getWeddingDate() : null)
-                .houseDisposal(reqeustDTO.getHouseDisposal())
-                .disposalDate(reqeustDTO.getHouseDisposal() == 1 ? reqeustDTO.getDisposalDate() : null)
-                .houseOwner(reqeustDTO.getHouseOwner())
-                .headOfHousehold(reqeustDTO.getHeadOfHousehold())
                 .totalGaScore(totalScore)
                 .build();
 
         gaScoreMapper.insertGaScore(responseDTO, userIdx);
-
         log.info("사용자 {} 청약 가점 저장 완료: totalScore={}", userIdx, totalScore);
 
         return responseDTO;
@@ -82,12 +131,10 @@ public class GaScoreService {
         return dto;
     }
 
-
-    private YearMonth ymOrNullToYearMonth(LocalDate date) {
-        return date != null ? YearMonth.from(date) : null;
+    private LocalDate parseYearMonth(String yearMonth) {
+        if (yearMonth == null || yearMonth.isEmpty()) return null;
+        return YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM")).atDay(1);
     }
-
-
 
     private int calculatePaymentPeriod(int userIdx) {
         LocalDate startDate = accountMapper.findAccountStartDate(userIdx);
@@ -97,23 +144,15 @@ public class GaScoreService {
     }
 
     private int calculatePaymentPeriodScore(int months) {
-        int years = months / 12;
         if (months < 6) return 1;
         if (months < 12) return 2;
-        if (years < 2) return 3;
-        if (years < 3) return 4;
-        if (years < 4) return 5;
-        if (years < 5) return 6;
-        if (years < 6) return 7;
-        if (years < 7) return 8;
-        if (years < 8) return 9;
-        if (years < 9) return 10;
-        if (years < 10) return 11;
-        if (years < 11) return 12;
-        if (years < 12) return 13;
-        if (years < 13) return 14;
-        if (years < 14) return 15;
-        if (years < 15) return 16;
-        return 17;
+        int years = months / 12;
+        return Math.min(years + 2, 17);
+    }
+
+    private int calculateNoHouseScore(int years) {
+        if (years == 0) return 0;
+        if (years < 1) return 2;
+        return Math.min(years * 2, 32);
     }
 }

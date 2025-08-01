@@ -1,6 +1,7 @@
 package org.scoula.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -67,4 +68,9 @@ public class GaScoreDTO {
     @JsonProperty("total_ga_score")
     private int totalGaScore;
 
+    @JsonProperty("residence_start_date")
+    private String residenceStartDate;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY, value = "birth_date")
+    private String birthDate;
 }
