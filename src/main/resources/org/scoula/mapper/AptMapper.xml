@@ -17,7 +17,7 @@
             gnrl_rnk2_etc_area_endde, przwner_presnatn_de, cntrct_cncls_bgnde,
             cntrct_cncls_endde, hmpg_adres, cnstrct_entrps_nm, mdhs_telno,
             bsns_mby_nm, mvn_prearnge_ym, speclt_rdn_earth_at, mdat_trget_area_secd,
-            parcprc_uls_at, pblanc_url
+            parcprc_uls_at, pblanc_url,si,sigungu
         ) VALUES (
                      #{houseManageNo}, #{pblancNo}, #{houseNm}, #{houseSecd}, #{houseSecdNm},
                      #{houseDtlSecd}, #{houseDtlSecdNm}, #{rentSecd}, #{rentSecdNm},
@@ -29,7 +29,9 @@
                      #{gnrlRnk2EtcAreaEndde}, #{przwnerPresnatnDe}, #{cntrctCnclsBgnde},
                      #{cntrctCnclsEndde}, #{hmpgAdres}, #{cnstrctEntrpsNm}, #{mdhsTelno},
                      #{bsnsMbyNm}, #{mvnPrearngeYm}, #{specltRdnEarthAt}, #{mdatTrgetAreaSecd},
-                     #{parcprcUlsAt}, #{pblancUrl}
+                     #{parcprcUlsAt}, #{pblancUrl},
+                    SUBSTRING_INDEX(#{hssplyAdres}, ' ', 1),
+                     SUBSTRING_INDEX(SUBSTRING_INDEX(#{hssplyAdres}, ' ', 2), ' ', -1)
                  )
             ON DUPLICATE KEY UPDATE
                                  house_nm = VALUES(house_nm),
@@ -79,7 +81,9 @@
             bsns_mby_nm,
             mdhs_telno,
             mvn_prearnge_ym,
-            pblanc_url
+            pblanc_url,
+            si,
+            sigungu
         ) VALUES (
                      #{houseManageNo},
                      #{pblancNo},
@@ -103,7 +107,9 @@
                      #{bsnsMbyNm},
                      #{mdhsTelno},
                      #{mvnPrearngeYm},
-                     #{pblancUrl}
+                     #{pblancUrl},
+                     SUBSTRING_INDEX(#{hssplyAdres}, ' ', 1),
+                     SUBSTRING_INDEX(SUBSTRING_INDEX(#{hssplyAdres}, ' ', 2), ' ', -1)
                  )
         ON DUPLICATE KEY UPDATE
                              house_nm = VALUES(house_nm),

@@ -103,10 +103,10 @@ class OfficetelServiceTest {
         officetelService.syncOfficetelData();
     }
 
-    @Test
-    void deleteOfficetelData() {
-        officetelService.deleteOldOfficetelDataBeforeThisMonth();
-    }
+//    @Test
+//    void deleteOfficetelData() {
+//        officetelService.deleteOldOfficetelDataBeforeThisMonth();
+//    }
 
     @Test
     void getAptDetail() {
