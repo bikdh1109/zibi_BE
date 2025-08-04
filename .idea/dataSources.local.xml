@@ -5,21 +5,16 @@
       <database-info product="MySQL" version="8.0.42-0ubuntu0.24.04.2" jdbc-version="4.2" driver-name="MySQL Connector/J" driver-version="mysql-connector-j-8.2.0 (Revision: 06a1f724497fd81c6a659131fda822c9e5085b6c)" dbms="MYSQL" exact-version="8.0.42" exact-driver-version="8.2">
         <extra-name-characters>#@</extra-name-characters>
         <identifier-quote-string>`</identifier-quote-string>
+        <jdbc-catalog-is-schema>true</jdbc-catalog-is-schema>
       </database-info>
       <case-sensitivity plain-identifiers="exact" quoted-identifiers="exact" />
       <secret-storage>master_key</secret-storage>
       <user-name>admin</user-name>
       <schema-mapping>
         <introspection-scope>
-          <node kind="schema" negative="1" />
+          <node kind="schema" qname="zibi" />
         </introspection-scope>
       </schema-mapping>
-      <load-sources>user_and_system_sources</load-sources>
-    </data-source>
-    <data-source name="@localhost" uuid="bb9e649f-61e5-4d24-9a91-24cbc28142ff">
-      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="MYSQL" />
-      <secret-storage>master_key</secret-storage>
-      <schema-mapping />
       <load-sources>user_and_system_sources</load-sources>
     </data-source>
   </component>
