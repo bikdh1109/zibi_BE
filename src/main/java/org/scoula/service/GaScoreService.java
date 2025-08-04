@@ -105,7 +105,7 @@ public class GaScoreService {
                 .build();
 
         gaScoreMapper.insertGaScore(responseDTO, userIdx);
-        log.info("사용자 {} 청약 가점 저장 완료: totalScore={}", userIdx, totalScore);
+        log.info("사용자 {} 청약 가점: totalScore={}", userIdx, totalScore);
 
         return responseDTO;
     }
