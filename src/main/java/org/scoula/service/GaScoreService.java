@@ -31,12 +31,14 @@ public class GaScoreService {
     private final JwtProcessor jwtProcessor;
 
     public GaScoreDTO saveGaScore(SwaggerGaScoreRequest requestDto, HttpServletRequest request) {
+        // 1. 사용자 정보 가져오기
         String bearerToken = request.getHeader("Authorization");
         String accessToken = tokenUtils.extractAccessToken(bearerToken);
 
         String userId = jwtProcessor.getUsername(accessToken);
         int userIdx = userMapper.findUserIdxByUserId(userId);
 
+        // 2. 날짜 파싱
         LocalDate birthDate = LocalDate.parse(requestDto.getBirthDate());
         LocalDate weddingDate = parseYearMonth(requestDto.getWeddingDate());
         LocalDate disposalDate = parseYearMonth(requestDto.getDisposalDate());
@@ -45,46 +47,39 @@ public class GaScoreService {
 
         int noHousePeriod;
         int noHouseScore;
-        String residenceStartDate = requestDto.getResidenceStartDate();
 
         LocalDate thirtiethBirthday = birthDate.plusYears(30);
         LocalDate baseDate = null;
 
-        // 조건 1: 만 30세 미만 & 미혼
-        if (age < 30 && requestDto.getMaritalStatus() == 0) {
+        log.info("houseOwner = {}", requestDto.getHouseOwner());
+
+        if (requestDto.getHouseOwner() == 1) {
             noHousePeriod = 0;
             noHouseScore = 0;
-            residenceStartDate = null;
         }
-        // 조건 2: 현재 주택 소유 중
-        else if (requestDto.getHouseOwner() == 1 && disposalDate == null) {
+        else if (age < 30 && requestDto.getMaritalStatus() == 0 && disposalDate == null) {
             noHousePeriod = 0;
             noHouseScore = 0;
-            residenceStartDate = null;
         }
-        // 조건 3: 현재 무주택
         else {
-            if (disposalDate != null) { // 과거 주택 소유 후 처분 이력 있음
+            if (age < 30) {
                 if (requestDto.getMaritalStatus() == 1 && weddingDate != null) {
-                    baseDate = Stream.of(thirtiethBirthday, weddingDate, disposalDate)
-                            .max(LocalDate::compareTo).get();
+                    baseDate = (disposalDate != null)
+                            ? Stream.of(weddingDate, disposalDate).max(LocalDate::compareTo).get()
+                            : weddingDate;
                 } else {
-                    baseDate = thirtiethBirthday.isAfter(disposalDate) ? thirtiethBirthday : disposalDate;
+                    baseDate = (disposalDate != null)
+                            ? Stream.of(thirtiethBirthday, disposalDate).max(LocalDate::compareTo).get()
+                            : thirtiethBirthday;
                 }
-            } else { // 과거 주택 소유 이력 없음
-                if (requestDto.getMaritalStatus() == 1 && weddingDate != null) {
-                    baseDate = thirtiethBirthday.isBefore(weddingDate) ? weddingDate : thirtiethBirthday;
-                } else {
-                    baseDate = thirtiethBirthday;
-                }
+            } else {
+                baseDate = (disposalDate != null)
+                        ? Stream.of(thirtiethBirthday, disposalDate).max(LocalDate::compareTo).get()
+                        : thirtiethBirthday;
             }
 
-            noHousePeriod = (int) ChronoUnit.YEARS.between(baseDate, LocalDate.now());
+            noHousePeriod = Math.max(0, (int) ChronoUnit.YEARS.between(baseDate, LocalDate.now()));
             noHouseScore = calculateNoHouseScore(noHousePeriod);
-
-            if (residenceStartDate == null && baseDate != null) {
-                residenceStartDate = baseDate.format(DateTimeFormatter.ofPattern("yyyy-MM"));
-            }
         }
 
         int dependentsScore = Math.min((requestDto.getDependentsNm() + 1) * 5, 35);
@@ -106,7 +101,7 @@ public class GaScoreService {
                 .weddingDate(weddingDate != null ?
                         weddingDate.format(DateTimeFormatter.ofPattern("yyyy-MM")) : null)
                 .birthDate(requestDto.getBirthDate())
-                .residenceStartDate(residenceStartDate)
+                .residenceStartDate(requestDto.getResidenceStartDate())
                 .paymentPeriod(paymentPeriod)
                 .paymentPeriodScore(paymentPeriodScore)
                 .totalGaScore(totalScore)
@@ -144,7 +139,6 @@ public class GaScoreService {
     private int calculatePaymentPeriod(int userIdx) {
         LocalDate startDate = accountMapper.findAccountStartDate(userIdx);
         if (startDate == null) return 0;
-
         return (int) ChronoUnit.MONTHS.between(startDate, LocalDate.now());
     }
 
