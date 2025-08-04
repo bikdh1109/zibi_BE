@@ -38,8 +38,8 @@ public class AptService {
     public AptResponseDTO fetchAptData(int page, int perPage) {
         try {
             // 오늘 날짜 월로 쿼리 날리기 yyyy-MM 포맷
-            String startDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
-
+//            String startDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            String startDate = "2025-07";
             StringBuilder urlBuilder = new StringBuilder(HOUSE_URL);
             urlBuilder.append("?")
                     .append("page=").append(page)
