@@ -1,4 +1,55 @@
 name: CI-CD.yml
 on:
+  push:
+    branches: ["main"]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📢 깃허브 checkout
+        uses: actions/checkout@v3
+
+      - name: 📢 GitHubAction JDK 17 설치
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 📢 Gradle 실행 권한 부여
+        run: chmod +x gradlew
+
+      - name: 📢 Gradle 캐싱
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: 📢 GitIgnore 파일들 넣어주기
+        env:
+          APPLICATION_PROPERTIES: ${{ secrets.APPLICATION_PROPERTIES}}
+          EMAIL_PROPERTIES: ${{secrets.EMAIL_PROPERTIES}}
+        run: |
+          rm -f src/main/resources/application.properties
+          rm -f src/main/resources/email.properties
+          echo "${{ secrets.APPLICATION_PROPERTIES }}" > src/main/resources/application.properties
+          echo "${{ secrets.EMAIL_PROPERTIES }}" > src/main/resources/email.properties
+
+      - name: 📢 Gradle 빌드(war 만들기)
+        run: ./gradlew clean build
+
+      - name: 📢 Docker image 만들기
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/zibi-backserver .
+
+      - name: 📢 DockerHub에 로그인
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME}}
+          password: ${{ secrets.DOCKERHUB_PASSWORD}}
+
+      - name: 📢 DockerHub에 PUSH
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME}}/zibi-backserver
