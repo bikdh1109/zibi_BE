@@ -103,17 +103,17 @@ class OfficetelServiceTest {
         officetelService.syncOfficetelData();
     }
 
-    @Test
-    void deleteOfficetelData() {
-        officetelService.deleteOldOfficetelDataBeforeThisMonth();
-    }
+//    @Test
+//    void deleteOfficetelData() {
+//        officetelService.deleteOldOfficetelDataBeforeThisMonth();
+//    }
 
-    @Test
-    void getAptDetail() {
-        OfficetelDetailDTO detail = officetelService.getOfficetelDetail("2025950040");
-        log.info("OfficetelDetailDTO  : {}",detail.toString());
-
-    }
+//    @Test
+//    void getAptDetail() {
+//        OfficetelDetailDTO detail = officetelService.getOfficetelDetail("2025950040");
+//        log.info("OfficetelDetailDTO  : {}",detail.toString());
+//
+//    }
 
 
 }

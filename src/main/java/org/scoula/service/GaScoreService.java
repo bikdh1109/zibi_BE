@@ -3,6 +3,7 @@ package org.scoula.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.scoula.dto.GaScoreDTO;
+import org.scoula.dto.swagger.GaScore.SwaggerGaScoreRequest;
 import org.scoula.mapper.AccountMapper;
 import org.scoula.mapper.GaScoreMapper;
 import org.scoula.mapper.UserMapper;
@@ -12,8 +13,11 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
+import java.time.Period;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -22,52 +26,116 @@ public class GaScoreService {
 
     private final GaScoreMapper gaScoreMapper;
     private final UserMapper userMapper;
-    private final AccountMapper accountMapper; // ✅ 추가
+    private final AccountMapper accountMapper;
     private final TokenUtils tokenUtils;
-    private final JwtProcessor jwtProcessor; // JWT 파싱용
+    private final JwtProcessor jwtProcessor;
 
-    public GaScoreDTO saveGaScore(GaScoreDTO dto, HttpServletRequest request) {
-        // 1. 헤더에서 토큰 추출
+    public GaScoreDTO saveGaScore(SwaggerGaScoreRequest requestDto, HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         String accessToken = tokenUtils.extractAccessToken(bearerToken);
 
-        // 2. JWT에서 userIdx 추출
         String userId = jwtProcessor.getUsername(accessToken);
         int userIdx = userMapper.findUserIdxByUserId(userId);
 
-        // 3. 날짜 필드 조건 처리
-        if (dto.getHouseDisposal() == 0) {
-            dto.setDisposalDate(null);
-        }
-        if (dto.getMaritalStatus() == 0) {
-            dto.setWeddingDate(null);
+        LocalDate birthDate = LocalDate.parse(requestDto.getBirthDate());
+        LocalDate weddingDate = parseYearMonth(requestDto.getWeddingDate());
+        LocalDate disposalDate = parseYearMonth(requestDto.getDisposalDate());
+
+        int age = Period.between(birthDate, LocalDate.now()).getYears();
+
+        int noHousePeriod;
+        int noHouseScore;
+        String residenceStartDate = requestDto.getResidenceStartDate();
+
+        if (age < 30 && requestDto.getMaritalStatus() == 0) {
+            noHousePeriod = 0;
+            noHouseScore = 0;
+        } else if (requestDto.getHouseOwner() == 1) {
+            noHousePeriod = 0;
+            noHouseScore = 0;
+        } else {
+            LocalDate thirtiethBirthday = birthDate.plusYears(30);
+            LocalDate baseDate;
+
+            if (requestDto.getHouseOwner() == 0) {
+                if (requestDto.getMaritalStatus() == 1 && weddingDate != null) {
+                    baseDate = thirtiethBirthday.isBefore(weddingDate) ? weddingDate : thirtiethBirthday;
+                } else {
+                    baseDate = thirtiethBirthday;
+                }
+            } else {
+                if (requestDto.getMaritalStatus() == 1 && weddingDate != null && disposalDate != null) {
+                    baseDate = Stream.of(thirtiethBirthday, weddingDate, disposalDate)
+                            .max(LocalDate::compareTo).get();
+                } else if (disposalDate != null) {
+                    baseDate = thirtiethBirthday.isAfter(disposalDate) ? thirtiethBirthday : disposalDate;
+                } else {
+                    baseDate = thirtiethBirthday;
+                }
+            }
+
+            noHousePeriod = (int) ChronoUnit.YEARS.between(baseDate, LocalDate.now());
+            noHouseScore = calculateNoHouseScore(noHousePeriod);
+
+            if (residenceStartDate == null) {
+                residenceStartDate = baseDate.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            }
         }
 
-        // 4. 점수 계산
-        int noHouseScore = Math.min(dto.getNoHousePeriod() * 2, 32);
-        int dependentsScore = Math.min((dto.getDependentsNm() + 1) * 5, 35);
-
+        int dependentsScore = Math.min((requestDto.getDependentsNm() + 1) * 5, 35);
         int paymentPeriod = calculatePaymentPeriod(userIdx);
         int paymentPeriodScore = calculatePaymentPeriodScore(paymentPeriod);
-
         int totalScore = noHouseScore + dependentsScore + paymentPeriodScore;
 
-        // 5. DTO에 결과 세팅
-        dto.setNoHouseScore(noHouseScore);
-        dto.setDependentsScore(dependentsScore);
-        dto.setPaymentPeriod(paymentPeriod);
-        dto.setPaymentPeriodScore(paymentPeriodScore);
-        dto.setTotalGaScore(totalScore);
+        GaScoreDTO responseDTO = GaScoreDTO.builder()
+                .noHousePeriod(noHousePeriod)
+                .noHouseScore(noHouseScore)
+                .dependentsNm(requestDto.getDependentsNm())
+                .dependentsScore(dependentsScore)
+                .headOfHousehold(requestDto.getHeadOfHousehold())
+                .houseOwner(requestDto.getHouseOwner())
+                .houseDisposal(requestDto.getHouseDisposal())
+                .disposalDate(disposalDate != null ?
+                        disposalDate.format(DateTimeFormatter.ofPattern("yyyy-MM")) : null)
+                .maritalStatus(requestDto.getMaritalStatus())
+                .weddingDate(weddingDate != null ?
+                        weddingDate.format(DateTimeFormatter.ofPattern("yyyy-MM")) : null)
+                .birthDate(requestDto.getBirthDate())
+                .residenceStartDate(residenceStartDate)
+                .paymentPeriod(paymentPeriod)
+                .paymentPeriodScore(paymentPeriodScore)
+                .totalGaScore(totalScore)
+                .build();
 
-        // 6. DB 저장
-        gaScoreMapper.insertGaScore(dto, userIdx);
-
+        gaScoreMapper.insertGaScore(responseDTO, userIdx);
         log.info("사용자 {} 청약 가점 저장 완료: totalScore={}", userIdx, totalScore);
+
+        return responseDTO;
+    }
+
+    public GaScoreDTO getGaScore(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        String accessToken = tokenUtils.extractAccessToken(bearerToken);
+
+        String userId = jwtProcessor.getUsername(accessToken);
+        int userIdx = userMapper.findUserIdxByUserId(userId);
+
+        GaScoreDTO dto = gaScoreMapper.findGaScoreByUserIdx(userIdx);
+
+        if (dto != null) {
+            log.info("사용자 {} 청약 가점 조회 완료: totalScore={}", userIdx, dto.getTotalGaScore());
+        } else {
+            log.warn("사용자 {} 청약 가점 조회 실패 - 데이터 없음", userIdx);
+        }
 
         return dto;
     }
 
-    // AccountMapper 활용해서 계좌 개설일 조회
+    private LocalDate parseYearMonth(String yearMonth) {
+        if (yearMonth == null || yearMonth.isEmpty()) return null;
+        return YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM")).atDay(1);
+    }
+
     private int calculatePaymentPeriod(int userIdx) {
         LocalDate startDate = accountMapper.findAccountStartDate(userIdx);
         if (startDate == null) return 0;
@@ -76,23 +144,15 @@ public class GaScoreService {
     }
 
     private int calculatePaymentPeriodScore(int months) {
-        int years = months / 12;
         if (months < 6) return 1;
         if (months < 12) return 2;
-        if (years < 2) return 3;
-        if (years < 3) return 4;
-        if (years < 4) return 5;
-        if (years < 5) return 6;
-        if (years < 6) return 7;
-        if (years < 7) return 8;
-        if (years < 8) return 9;
-        if (years < 9) return 10;
-        if (years < 10) return 11;
-        if (years < 11) return 12;
-        if (years < 12) return 13;
-        if (years < 13) return 14;
-        if (years < 14) return 15;
-        if (years < 15) return 16;
-        return 17;
+        int years = months / 12;
+        return Math.min(years + 2, 17);
+    }
+
+    private int calculateNoHouseScore(int years) {
+        if (years == 0) return 0;
+        if (years < 1) return 2;
+        return Math.min(years * 2, 32);
     }
 }

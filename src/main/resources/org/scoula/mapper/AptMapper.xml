@@ -17,7 +17,7 @@
             gnrl_rnk2_etc_area_endde, przwner_presnatn_de, cntrct_cncls_bgnde,
             cntrct_cncls_endde, hmpg_adres, cnstrct_entrps_nm, mdhs_telno,
             bsns_mby_nm, mvn_prearnge_ym, speclt_rdn_earth_at, mdat_trget_area_secd,
-            parcprc_uls_at, pblanc_url
+            parcprc_uls_at, pblanc_url,si,sigungu
         ) VALUES (
                      #{houseManageNo}, #{pblancNo}, #{houseNm}, #{houseSecd}, #{houseSecdNm},
                      #{houseDtlSecd}, #{houseDtlSecdNm}, #{rentSecd}, #{rentSecdNm},
@@ -29,7 +29,9 @@
                      #{gnrlRnk2EtcAreaEndde}, #{przwnerPresnatnDe}, #{cntrctCnclsBgnde},
                      #{cntrctCnclsEndde}, #{hmpgAdres}, #{cnstrctEntrpsNm}, #{mdhsTelno},
                      #{bsnsMbyNm}, #{mvnPrearngeYm}, #{specltRdnEarthAt}, #{mdatTrgetAreaSecd},
-                     #{parcprcUlsAt}, #{pblancUrl}
+                     #{parcprcUlsAt}, #{pblancUrl},
+                    SUBSTRING_INDEX(#{hssplyAdres}, ' ', 1),
+                     SUBSTRING_INDEX(SUBSTRING_INDEX(#{hssplyAdres}, ' ', 2), ' ', -1)
                  )
             ON DUPLICATE KEY UPDATE
                                  house_nm = VALUES(house_nm),
@@ -79,7 +81,9 @@
             bsns_mby_nm,
             mdhs_telno,
             mvn_prearnge_ym,
-            pblanc_url
+            pblanc_url,
+            si,
+            sigungu
         ) VALUES (
                      #{houseManageNo},
                      #{pblancNo},
@@ -103,7 +107,9 @@
                      #{bsnsMbyNm},
                      #{mdhsTelno},
                      #{mvnPrearngeYm},
-                     #{pblancUrl}
+                     #{pblancUrl},
+                     SUBSTRING_INDEX(#{hssplyAdres}, ' ', 1),
+                     SUBSTRING_INDEX(SUBSTRING_INDEX(#{hssplyAdres}, ' ', 2), ' ', -1)
                  )
         ON DUPLICATE KEY UPDATE
                              house_nm = VALUES(house_nm),
@@ -144,7 +150,11 @@
     </resultMap>
 
     <resultMap id="aptDetailMap" type="org.scoula.dto.AptDetailDTO">
+
         <id property="pblancNo" column="pblanc_no"/>
+        <result property="aptIdx" column="apt_idx"/>
+        <result property="favoriteCount" column="favorite_count"/>
+        <result property="viewCount" column="view_count"/>
         <result property="houseManageNo" column="house_manage_no"/>
         <result property="houseNm" column="house_nm"/>
         <result property="houseSecd" column="house_secd"/>
@@ -185,9 +195,16 @@
         <collection property="aptType" resultMap="aptTypeMap"/>
     </resultMap>
 
+    <update id="incrementAptViewCount">
+        UPDATE apt_table
+        SET view_count = view_count + 1
+        WHERE pblanc_no = #{pblancNo}
+    </update>
+
 
     <select id="getAptDetails" resultMap="aptDetailMap">
         SELECT
+            a.apt_idx,
             a.house_manage_no,
             a.pblanc_no,
             a.house_nm,
@@ -226,7 +243,8 @@
             a.mdat_trget_area_secd,
             a.parcprc_uls_at,
             a.pblanc_url,
-
+            a.view_count,
+            (SELECT COUNT(*) FROM user_favorite uf WHERE uf.apt_pblanc = a.pblanc_no) AS favorite_count,
             t.house_ty,
             t.suply_ar,
             t.suply_hshldco,
@@ -235,8 +253,9 @@
 
         FROM apt_table a
                  LEFT JOIN apt_type t ON a.apt_idx = t.apt_idx
-        WHERE a.pblanc_no = #{pblancNo};
+        WHERE a.pblanc_no = #{pblancNo}
     </select>
+
 
     <insert id="insertOfficetelType">
         INSERT INTO officetel_type (
@@ -267,6 +286,12 @@
                              subscrpt_reqst_amount = VALUES(subscrpt_reqst_amount),
                              tp = VALUES(tp);
     </insert>
+    <update id="incrementOfficetelViewCount">
+        UPDATE officetel_table
+        SET view_count = view_count + 1
+        WHERE pblanc_no = #{pblancNo}
+    </update>
+
 
     <delete id="deleteOldFromOfficetel" parameterType="java.time.LocalDate">
         DELETE FROM officetel_table
@@ -288,6 +313,8 @@
 
     <resultMap id="officetelDetailMap" type="org.scoula.dto.OfficetelDetailDTO">
         <id property="pblancNo" column="pblanc_no"/>
+        <result property="favoriteCount" column="favorite_count"/>
+        <result property="viewCount" column="view_count"/>
         <result property="houseManageNo" column="house_manage_no"/>
         <result property="houseNm" column="house_nm"/>
         <result property="houseSecd" column="house_secd"/>
@@ -315,6 +342,7 @@
 
     <select id="getOfficetelDetails" resultMap="officetelDetailMap">
         SELECT
+            ot.view_count,
             ot.house_manage_no,
             ot.pblanc_no,
             ot.house_nm,
@@ -345,16 +373,60 @@
             ott.suply_amount,
             ott.subscrpt_reqst_amount,
             ott.house_manage_no ,
-            ott.pblanc_no
+            ott.pblanc_no,
+        (SELECT COUNT(*) FROM user_favorite uf WHERE uf.office_pblanc = ot.pblanc_no) AS favorite_count
+
         FROM officetel_table ot
                  LEFT JOIN officetel_type ott
                            ON ot.officetel_idx = ott.officetel_idx
         WHERE ot.pblanc_no = #{pblancNo}
     </select>
 
+    <select id="findAllAptLocations" resultType="org.scoula.dto.AptDTO">
+        SELECT
+            apt_idx AS aptIdx,
+            latitude,
+            longitude
+        FROM apt_table
+        WHERE latitude IS NOT NULL
+          AND longitude IS NOT NULL
+    </select>
+    <select id="findAptIdxByPblancNo" resultType="java.lang.Integer">
+        SELECT apt_idx
+        FROM apt_table
+        WHERE pblanc_no = #{pblancNo}
+    </select>
+
+    <select id="getInfraPlace" resultType="org.scoula.dto.InfraPlaceDTO">
+        SELECT place_type, place_idx, place_name, distance, road_address_name
+        FROM vw_infra_places WHERE apt_idx = #{aptIdx}
+    </select>
+
+    <select id="getOfficetelInfraPlace" resultType="org.scoula.dto.InfraPlaceDTO">
+        SELECT place_type, place_idx, place_name, distance, road_address_name
+        FROM vw_infra_places WHERE officetel_idx = #{officetelIdx}
+    </select>
 
 
+    <select id="findOfficetelIdxByPblancNo" resultType="java.lang.Integer">
+        SELECT officetel_idx
+        FROM officetel_table
+        WHERE pblanc_no = #{pblancNo}
+    </select>
 
+    <select id="findAllOfficetelLocations" resultType="org.scoula.dto.OfficetelDTO">
+        SELECT
+            officetel_idx AS officetelIdx,
+            latitude,
+            longitude
+        FROM officetel_table
+        WHERE latitude IS NOT NULL
+          AND longitude IS NOT NULL
+    </select>
+    <select id="countFavoritesByPblancNo" resultType="int">
+        SELECT COUNT(*) FROM user_favorite
+        WHERE apt_pblanc = #{pblancNo}
+    </select>
 
 
 </mapper>

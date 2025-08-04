@@ -52,7 +52,8 @@ public class SwaggerConfig {
     private SecurityContext securityContext() {
         return SecurityContext.builder()
                 .securityReferences(defaultAuth())
-                .forPaths(PathSelectors.regex("/v1/(?!auth/(login|refresh|signup)|email|oauth/kakao).*"))
+                .forPaths(PathSelectors.regex("/v1/(?!auth/(login|refresh|signup|resetpassword)|email|oauth/kakao).*"
+                ))
                 .build();
     }
 
