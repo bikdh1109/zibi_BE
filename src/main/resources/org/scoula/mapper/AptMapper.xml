@@ -17,7 +17,7 @@
             gnrl_rnk2_etc_area_endde, przwner_presnatn_de, cntrct_cncls_bgnde,
             cntrct_cncls_endde, hmpg_adres, cnstrct_entrps_nm, mdhs_telno,
             bsns_mby_nm, mvn_prearnge_ym, speclt_rdn_earth_at, mdat_trget_area_secd,
-            parcprc_uls_at, pblanc_url
+            parcprc_uls_at, pblanc_url,si,sigungu
         ) VALUES (
                      #{houseManageNo}, #{pblancNo}, #{houseNm}, #{houseSecd}, #{houseSecdNm},
                      #{houseDtlSecd}, #{houseDtlSecdNm}, #{rentSecd}, #{rentSecdNm},
@@ -29,7 +29,9 @@
                      #{gnrlRnk2EtcAreaEndde}, #{przwnerPresnatnDe}, #{cntrctCnclsBgnde},
                      #{cntrctCnclsEndde}, #{hmpgAdres}, #{cnstrctEntrpsNm}, #{mdhsTelno},
                      #{bsnsMbyNm}, #{mvnPrearngeYm}, #{specltRdnEarthAt}, #{mdatTrgetAreaSecd},
-                     #{parcprcUlsAt}, #{pblancUrl}
+                     #{parcprcUlsAt}, #{pblancUrl},
+                    SUBSTRING_INDEX(#{hssplyAdres}, ' ', 1),
+                     SUBSTRING_INDEX(SUBSTRING_INDEX(#{hssplyAdres}, ' ', 2), ' ', -1)
                  )
             ON DUPLICATE KEY UPDATE
                                  house_nm = VALUES(house_nm),
@@ -79,7 +81,9 @@
             bsns_mby_nm,
             mdhs_telno,
             mvn_prearnge_ym,
-            pblanc_url
+            pblanc_url,
+            si,
+            sigungu
         ) VALUES (
                      #{houseManageNo},
                      #{pblancNo},
@@ -103,7 +107,9 @@
                      #{bsnsMbyNm},
                      #{mdhsTelno},
                      #{mvnPrearngeYm},
-                     #{pblancUrl}
+                     #{pblancUrl},
+                     SUBSTRING_INDEX(#{hssplyAdres}, ' ', 1),
+                     SUBSTRING_INDEX(SUBSTRING_INDEX(#{hssplyAdres}, ' ', 2), ' ', -1)
                  )
         ON DUPLICATE KEY UPDATE
                              house_nm = VALUES(house_nm),
@@ -186,6 +192,8 @@
         <result property="mdatTrgetAreaSecd" column="mdat_trget_area_secd"/>
         <result property="parcprcUlsAt" column="parcprc_uls_at"/>
         <result property="pblancUrl" column="pblanc_url"/>
+        <result property="latitude" column="latitude" />
+        <result property="longitude" column="longitude"/>
         <collection property="aptType" resultMap="aptTypeMap"/>
     </resultMap>
 
@@ -238,6 +246,8 @@
             a.parcprc_uls_at,
             a.pblanc_url,
             a.view_count,
+            a.latitude,
+            a.longitude,
             (SELECT COUNT(*) FROM user_favorite uf WHERE uf.apt_pblanc = a.pblanc_no) AS favorite_count,
             t.house_ty,
             t.suply_ar,
@@ -330,6 +340,8 @@
         <result property="bsnsMbyNm" column="bsns_mby_nm"/>
         <result property="mdhsTelno" column="mdhs_telno"/>
         <result property="mvnPrearngeYm" column="mvn_prearnge_ym"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
         <result property="pblancUrl" column="pblanc_url"/>
         <collection property="officetelType" resultMap="officetelTypeMap"/>
     </resultMap>
@@ -368,6 +380,8 @@
             ott.subscrpt_reqst_amount,
             ott.house_manage_no ,
             ott.pblanc_no,
+            ot.longitude,
+            ot.latitude,
         (SELECT COUNT(*) FROM user_favorite uf WHERE uf.office_pblanc = ot.pblanc_no) AS favorite_count
 
         FROM officetel_table ot

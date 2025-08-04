@@ -33,7 +33,6 @@ public class KakaoMapInfraService {
     }
 
     public void fetchAndSavePlacesForAll() {
-        // 테이블 초기화
         placeMapper.truncateHospital();
         placeMapper.truncateMart();
         placeMapper.truncateSchool();
@@ -41,24 +40,21 @@ public class KakaoMapInfraService {
         placeMapper.truncateKindergarten();
         log.info("모든 장소 테이블 초기화 완료");
 
-        // 아파트 + 오피스텔 위치 합치기
         List<AptDTO> aptList = aptMapper.findAllAptLocations();
         List<OfficetelDTO> officetelList = aptMapper.findAllOfficetelLocations();
 
         Map<String, String> categoryMap = Map.of(
-                "HP8", "hospital",     // 병원
-                "MT1", "mart",        // 대형마트
-                "SC4", "school",      // 학교
-                "SW8", "subway",      // 지하철역
-                "PS3", "kindergarten" // 유치원
+                "HP8", "hospital",
+                "MT1", "mart",
+                "SC4", "school",
+                "SW8", "subway",
+                "PS3", "kindergarten"
         );
 
-        // 아파트 처리
         for (AptDTO apt : aptList) {
             processLocation(apt.getAptIdx(), null, apt.getLatitude(), apt.getLongitude(), categoryMap);
         }
 
-        // 오피스텔 처리
         for (OfficetelDTO officetel : officetelList) {
             processLocation(null, officetel.getOfficetelIdx(), officetel.getLatitude(), officetel.getLongitude(), categoryMap);
         }
@@ -72,7 +68,6 @@ public class KakaoMapInfraService {
             String categoryCode = entry.getKey();
             String placeType = entry.getValue();
 
-            // 카테고리별 반경 설정
             int radius;
             switch (placeType) {
                 case "hospital": radius = 4000; break;
@@ -95,7 +90,6 @@ public class KakaoMapInfraService {
                 place.setOfficetelIdx(officetelIdx);
                 place.setPlaceType(placeType);
 
-                // 중복 체크
                 boolean exists = placeMapper.existsPlace(
                         aptIdx != null ? aptIdx : officetelIdx,
                         place.getPlaceName(),
@@ -126,6 +120,7 @@ public class KakaoMapInfraService {
         List<PlaceDTO> allResults = new ArrayList<>();
 
         while (true) {
+
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(CATEGORY_SEARCH_URL)
                     .queryParam("category_group_code", categoryCode)
                     .queryParam("x", longitude)
@@ -169,13 +164,11 @@ public class KakaoMapInfraService {
 
                 allResults.add(dto);
 
-                // 5개 모이면 중단
                 if (allResults.size() >= 5) {
                     return filterResults(allResults, placeType);
                 }
             }
 
-            // meta에서 is_end 체크
             Map<String, Object> meta = (Map<String, Object>) body.get("meta");
             if (meta != null && Boolean.TRUE.equals(meta.get("is_end"))) break;
 
