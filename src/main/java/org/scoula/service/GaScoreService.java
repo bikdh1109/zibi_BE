@@ -51,51 +51,42 @@ public class GaScoreService {
         LocalDate thirtiethBirthday = birthDate.plusYears(30);
         LocalDate baseDate = null;
 
-        System.out.println("houseOwner ================>" +requestDto.getHouseOwner());
+        log.info("houseOwner = {}", requestDto.getHouseOwner());
 
-        // ✅ 1순위: 현재 주택 소유 중이면 무조건 0점
         if (requestDto.getHouseOwner() == 1) {
             noHousePeriod = 0;
             noHouseScore = 0;
         }
-        // ✅ 만 30세 미만 + 미혼 + 주택처분 경험 없음
         else if (age < 30 && requestDto.getMaritalStatus() == 0 && disposalDate == null) {
             noHousePeriod = 0;
             noHouseScore = 0;
         }
-        // ✅ 무주택 산정
         else {
             if (age < 30) {
                 if (requestDto.getMaritalStatus() == 1 && weddingDate != null) {
-                    // 만 30세 이전 결혼 → 혼인날짜 vs 주택 처분일
                     baseDate = (disposalDate != null)
                             ? Stream.of(weddingDate, disposalDate).max(LocalDate::compareTo).get()
                             : weddingDate;
                 } else {
-                    // 미혼 → 만30세 vs 주택 처분일
                     baseDate = (disposalDate != null)
                             ? Stream.of(thirtiethBirthday, disposalDate).max(LocalDate::compareTo).get()
                             : thirtiethBirthday;
                 }
             } else {
-                // 만 30세 이상 → 만30세 vs 주택 처분일
                 baseDate = (disposalDate != null)
                         ? Stream.of(thirtiethBirthday, disposalDate).max(LocalDate::compareTo).get()
                         : thirtiethBirthday;
             }
 
-            // ✅ 무주택 기간 계산 (음수 방지)
             noHousePeriod = Math.max(0, (int) ChronoUnit.YEARS.between(baseDate, LocalDate.now()));
             noHouseScore = calculateNoHouseScore(noHousePeriod);
         }
 
-        // 3. 다른 점수 계산
         int dependentsScore = Math.min((requestDto.getDependentsNm() + 1) * 5, 35);
         int paymentPeriod = calculatePaymentPeriod(userIdx);
         int paymentPeriodScore = calculatePaymentPeriodScore(paymentPeriod);
         int totalScore = noHouseScore + dependentsScore + paymentPeriodScore;
 
-        // 4. DTO 생성 (residenceStartDate는 사용자 입력 그대로 사용)
         GaScoreDTO responseDTO = GaScoreDTO.builder()
                 .noHousePeriod(noHousePeriod)
                 .noHouseScore(noHouseScore)
@@ -110,13 +101,12 @@ public class GaScoreService {
                 .weddingDate(weddingDate != null ?
                         weddingDate.format(DateTimeFormatter.ofPattern("yyyy-MM")) : null)
                 .birthDate(requestDto.getBirthDate())
-                .residenceStartDate(requestDto.getResidenceStartDate()) // ✅ 입력값 그대로 사용
+                .residenceStartDate(requestDto.getResidenceStartDate())
                 .paymentPeriod(paymentPeriod)
                 .paymentPeriodScore(paymentPeriodScore)
                 .totalGaScore(totalScore)
                 .build();
 
-        // 5. DB 저장
         gaScoreMapper.insertGaScore(responseDTO, userIdx);
         log.info("사용자 {} 청약 가점 저장 완료: totalScore={}", userIdx, totalScore);
 
