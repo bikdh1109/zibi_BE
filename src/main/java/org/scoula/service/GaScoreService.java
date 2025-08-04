@@ -31,14 +31,12 @@ public class GaScoreService {
     private final JwtProcessor jwtProcessor;
 
     public GaScoreDTO saveGaScore(SwaggerGaScoreRequest requestDto, HttpServletRequest request) {
-        // 1. 사용자 정보 가져오기
         String bearerToken = request.getHeader("Authorization");
         String accessToken = tokenUtils.extractAccessToken(bearerToken);
 
         String userId = jwtProcessor.getUsername(accessToken);
         int userIdx = userMapper.findUserIdxByUserId(userId);
 
-        // 2. 날짜 파싱
         LocalDate birthDate = LocalDate.parse(requestDto.getBirthDate());
         LocalDate weddingDate = parseYearMonth(requestDto.getWeddingDate());
         LocalDate disposalDate = parseYearMonth(requestDto.getDisposalDate());
