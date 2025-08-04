@@ -30,7 +30,8 @@ public class GaScoreController {
     public ResponseEntity<GaScoreDTO> saveGaScore(@RequestBody SwaggerGaScoreRequest requestDto,
                                                  @ApiParam(hidden = true) HttpServletRequest request) {
         log.info("POST /v1/ga-score request: {}", requestDto);
-
+        log.info("houseOwner = {}", requestDto.getHouseOwner());
+        System.out.println("houseOwner===================>" + requestDto.getHouseOwner());
         GaScoreDTO responseDto = gaScoreService.saveGaScore(requestDto, request);
 
         return ResponseEntity.ok(responseDto);

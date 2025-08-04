@@ -126,6 +126,7 @@ public class KakaoMapInfraService {
         List<PlaceDTO> allResults = new ArrayList<>();
 
         while (true) {
+
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(CATEGORY_SEARCH_URL)
                     .queryParam("category_group_code", categoryCode)
                     .queryParam("x", longitude)

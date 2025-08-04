@@ -51,7 +51,6 @@ public class GaScoreService {
         LocalDate thirtiethBirthday = birthDate.plusYears(30);
         LocalDate baseDate = null;
 
-        log.info("houseOwner = {}", requestDto.getHouseOwner());
 
         if (requestDto.getHouseOwner() == 1) {
             noHousePeriod = 0;
