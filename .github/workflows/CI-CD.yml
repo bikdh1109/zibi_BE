@@ -1,7 +1,7 @@
 name: CI-CD.yml
 on:
   pull_request:
-    branches: ["test"]
+    branches: ["jeemin"]
     types:
       - closed
 
