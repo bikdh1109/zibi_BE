@@ -13,6 +13,7 @@ import java.util.List;
 public interface UserMapper {
 
     Integer findUserIdxByUserId(@Param("userId") String userId);
+    List<AuthDTO> findAuthByUserIdx(int userIdx);
 
     MemberDTO findById(@Param("userId") String userId);
     List<MemberDTO> findAll();
