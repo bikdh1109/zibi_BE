@@ -1,7 +1,7 @@
 name: CI-CD.yml
 on:
   push:
-    branches: ["main"]
+    branches: ["donguk"]
 
 jobs:
   build:
@@ -33,9 +33,12 @@ jobs:
         env:
           APPLICATION_PROPERTIES: ${{ secrets.APPLICATION_PROPERTIES}}
           EMAIL_PROPERTIES: ${{secrets.EMAIL_PROPERTIES}}
+          KEYSTORE_P12_B64: ${{ secrets.KEYSTORE_P12_B64 }}
         run: |
           rm -f src/main/resources/application.properties
           rm -f src/main/resources/email.properties
+          mkdir -p src/main/resources
+          echo "$KEYSTORE_P12_B64" | base64 --decode > src/main/resources/keystore.p12
           echo "${{ secrets.APPLICATION_PROPERTIES }}" > src/main/resources/application.properties
           echo "${{ secrets.EMAIL_PROPERTIES }}" > src/main/resources/email.properties
 
