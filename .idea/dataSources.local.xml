@@ -16,6 +16,7 @@
       </schema-mapping>
       <load-sources>user_and_system_sources</load-sources>
     </data-source>
+<<<<<<< HEAD
     <data-source name="@localhost" uuid="bb9e649f-61e5-4d24-9a91-24cbc28142ff">
       <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="MYSQL" />
       <secret-storage>master_key</secret-storage>
@@ -36,5 +37,7 @@
         </introspection-scope>
       </schema-mapping>
     </data-source>
+=======
+>>>>>>> upstream/develop
   </component>
 </project>
