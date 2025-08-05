@@ -30,17 +30,15 @@ public class RankService {
     private final GaScoreMapper gaScoreMapper;
 
     public RankAreaResponseDTO calculateApartmentRank(int userIdx, String pblancNo) {
-        // 1. 공고 정보 조회
         AptDetailDTO aptDetail = aptMapper.getAptDetails(pblancNo);
         if (aptDetail == null) {
             throw new IllegalArgumentException("해당 공고를 찾을 수 없습니다.");
         }
 
-        String houseType = aptDetail.getHouseDtlSecdNm(); // "민영" or "국민"
-        String specltRdnEarthAt = aptDetail.getSpecltRdnEarthAt(); // "Y" or "N"
+        String houseType = aptDetail.getHouseDtlSecdNm();
+        String specltRdnEarthAt = aptDetail.getSpecltRdnEarthAt();
         String subscrptArea = aptDetail.getSubscrptAreaCodeNm();
 
-        // 2. 사용자 계좌 정보 조회
         ChungyakAccountDTO account = accountMapper.findAccountByUserIdx(userIdx);
         if (account == null) {
             throw new IllegalStateException("사용자 청약 계좌 정보가 없습니다.");
@@ -48,7 +46,6 @@ public class RankService {
         int resFinalRoundNo = Integer.parseInt(account.getResFinalRoundNo());
         int resAccountBalance = Integer.parseInt(account.getAccountBalance());
 
-        // 3. 사용자 가점 정보 조회
         GaScoreDTO gaScore = gaScoreMapper.findGaScoreByUserIdx(userIdx);
         if (gaScore == null) {
             throw new IllegalStateException("사용자 가점 정보가 없습니다.");
@@ -65,7 +62,6 @@ public class RankService {
         }
         String address = userMapper.findUserRegionByIdx(userIdx);
 
-        // 4. 면적별 순위 계산
         Map<String, String> rankMap = new LinkedHashMap<>();
         rankMap.put("85 이하", checkRank(85, houseType, specltRdnEarthAt, subscrptArea,
                 resFinalRoundNo, resAccountBalance, paymentPeriod, residenceStartDate, address));

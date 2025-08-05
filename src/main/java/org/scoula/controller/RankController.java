@@ -42,16 +42,13 @@ public class RankController {
             @ApiParam(hidden = true) HttpServletRequest request) {
 
         try {
-            // 1. 사용자 인증 처리
             String bearerToken = request.getHeader("Authorization");
             String accessToken = tokenUtils.extractAccessToken(bearerToken);
             String userId = jwtProcessor.getUsername(accessToken);
             int userIdx = userMapper.findUserIdxByUserId(userId);
 
-            // 2. 서비스 호출
             RankAreaResponseDTO rankResult = rankService.calculateApartmentRank(userIdx, pblancNo);
 
-            // 3. 결과 반환
             return ResponseEntity.ok(rankResult);
 
         } catch (IllegalArgumentException e) {
