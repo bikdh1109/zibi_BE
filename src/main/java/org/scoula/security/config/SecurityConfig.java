@@ -65,13 +65,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        // 와일드카드 + credentials 허용
-        config.addAllowedOriginPattern("*");
+        config.addAllowedOrigin("https://zibi.vercel.app"); // 프론트 주소 명시
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
+
 
 
     //jwt 관련
