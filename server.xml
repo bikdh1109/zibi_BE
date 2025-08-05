@@ -14,7 +14,7 @@
                    SSLEnabled="true"
                    scheme="https"
                    secure="true"
-                   keystoreFile="/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/keystore.p12"
+                   keystoreFile="/usr/local/tomcat/conf/keystore.p12"
                    keystoreType="PKCS12"
                    keystorePass="zibipassword"
                    clientAuth="false"
