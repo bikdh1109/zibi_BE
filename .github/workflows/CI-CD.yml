@@ -76,7 +76,7 @@ jobs:
     needs: build
     if: github.event_name == 'push'
     steps:
-      - name: 📢SSH로 EC2에 접속해보자
+      - name: 📢SSH로 EC2에 접속해보자 !!
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST}}
