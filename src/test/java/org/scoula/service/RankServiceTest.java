@@ -68,6 +68,6 @@ class RankServiceTest {
 
         // then
         assertNotNull(result);
-        assertEquals("1순위", result.getRankByArea().get("85 이하"));
+        assertEquals("3순위", result.getRankByArea().get("85 이하"));
     }
 }

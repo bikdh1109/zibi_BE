@@ -126,21 +126,21 @@ public class RankService {
 
     private int getRequiredDeposit(String region, int homeSize) {
         if (homeSize <= 85) {
-            if (region.startsWith("서울") || region.startsWith("부산")) return 300;
-            if (isMetropolitan(region)) return 250;
-            return 200;
+            if (region.startsWith("서울") || region.startsWith("부산")) return 3000000;
+            if (isMetropolitan(region)) return 2500000;
+            return 2000000;
         } else if (homeSize <= 102) {
-            if (region.startsWith("서울") || region.startsWith("부산")) return 600;
-            if (isMetropolitan(region)) return 400;
-            return 300;
+            if (region.startsWith("서울") || region.startsWith("부산")) return 6000000;
+            if (isMetropolitan(region)) return 4000000;
+            return 3000000;
         } else if (homeSize <= 135) {
-            if (region.startsWith("서울") || region.startsWith("부산")) return 1000;
-            if (isMetropolitan(region)) return 700;
-            return 400;
+            if (region.startsWith("서울") || region.startsWith("부산")) return 10000000;
+            if (isMetropolitan(region)) return 7000000;
+            return 4000000;
         } else {
-            if (region.startsWith("서울") || region.startsWith("부산")) return 1500;
-            if (isMetropolitan(region)) return 1000;
-            return 500;
+            if (region.startsWith("서울") || region.startsWith("부산")) return 15000000;
+            if (isMetropolitan(region)) return 10000000;
+            return 5000000;
         }
     }
 
