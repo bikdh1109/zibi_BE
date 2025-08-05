@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Server port="8005" shutdown="SHUTDOWN">
+    <Service name="Catalina">
+
+        <!-- HTTP 커넥터 -->
+        <Connector port="8080" protocol="HTTP/1.1"
+                   connectionTimeout="20000"
+                   redirectPort="8443" />
+
+        <!-- HTTPS 커넥터 -->
+        <Connector port="8443"
+                   protocol="org.apache.coyote.http11.Http11NioProtocol"
+                   maxThreads="200"
+                   SSLEnabled="true"
+                   scheme="https"
+                   secure="true"
+                   keystoreFile="/usr/local/tomcat/conf/keystore.p12"
+                   keystoreType="PKCS12"
+                   keystorePass="zibipassword"
+                   clientAuth="false"
+                   sslProtocol="TLS" />
+
+        <Engine name="Catalina" defaultHost="localhost">
+            <Realm className="org.apache.catalina.realm.LockOutRealm">
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+                       resourceName="UserDatabase"/>
+            </Realm>
+
+            <Host name="localhost" appBase="webapps"
+                  unpackWARs="true" autoDeploy="true">
+            </Host>
+        </Engine>
+
+    </Service>
+</Server>
