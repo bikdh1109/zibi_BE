@@ -17,6 +17,7 @@ public class RecentCheckService {
     private final RecentCheckMapper mapper;
 
     public void insertRecentCheck(int usersIdx, String pblancNo,String houseType) {
+        log.info("📌 mapper.insertRecentCheck 실행 직전");
         // 1) 필수값 검증
         if (usersIdx <= 0) {
             throw new IllegalArgumentException("userIdx가 비어 있을 수 없습니다.");
