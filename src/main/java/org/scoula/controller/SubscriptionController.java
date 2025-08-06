@@ -11,6 +11,7 @@ import org.scoula.security.util.JwtProcessor;
 import org.scoula.service.AptService;
 import org.scoula.service.HouseService;
 import org.scoula.service.OfficetelService;
+import org.scoula.service.RecentCheckService;
 import org.scoula.util.TokenUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,7 @@ public class SubscriptionController {
     private final TokenUtils tokenUtils;
     private final JwtProcessor jwtProcessor;
     private final UserMapper userMapper;
+    private final RecentCheckService recentCheckService;
 
     @GetMapping("")
     @ApiOperation(
@@ -67,8 +69,12 @@ public class SubscriptionController {
             @ApiResponse(code = 401, message = "인증 실패"),
             @ApiResponse(code = 500, message = "서버 오류")
     })
-    public ResponseEntity<?> getApartmentDetail(@ApiParam(value = "아파트 공고번호", example = "2025000306", required = true) @RequestParam("pblanc_no") String pblancNo) {
+    public ResponseEntity<?> getApartmentDetail(@RequestHeader("Authorization") String bearerToken,@ApiParam(value = "아파트 공고번호", example = "2025000306", required = true) @RequestParam("pblanc_no") String pblancNo) {
         try {
+            String accessToken = tokenUtils.extractAccessToken(bearerToken);
+            String userId = jwtProcessor.getUsername(accessToken);
+            int userIdx = userMapper.findUserIdxByUserId(userId);
+            recentCheckService.insertRecentCheck(userIdx,pblancNo,"APT");
             aptService.incrementAptViewCount(pblancNo);
             AptDetailDTO detail = aptService.getAptDetail(pblancNo);
             return ResponseEntity.ok(detail);
