@@ -14,13 +14,12 @@
 
     <select id="findAuthByUserIdx" resultType="org.scoula.security.dto.AuthDTO">
         SELECT
-            ua.user_idx,
-            ua.auth
+            user_idx,
+            auth
         FROM
-            users_auth ua
-                JOIN users u ON ua.user_idx = u.users_idx
+            users_auth
         WHERE
-            u.users_idx = #{userIdx}
+            user_idx = #{userIdx}
     </select>
 
 
