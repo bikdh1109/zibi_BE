@@ -65,13 +65,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        // 와일드카드 + credentials 허용
-        config.addAllowedOriginPattern("*");
+        config.addAllowedOriginPattern("*"); // 모든 Origin 허용 + credentials 허용
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
+
+
 
 
     //jwt 관련

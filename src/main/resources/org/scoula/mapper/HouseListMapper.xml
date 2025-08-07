@@ -17,7 +17,11 @@
                            ON v.pblanc_no = COALESCE(uf.apt_pblanc, uf.office_pblanc)
                                AND uf.users_idx = #{userIdx}
     </select>
-
+    <select id="getHouseDetailByPblancNo" resultType="org.scoula.dto.AllHouseListDTO">
+        SELECT *
+        FROM vw_all_house_list
+        WHERE pblanc_no = #{pblancNo}
+    </select>
 
 
 </mapper>

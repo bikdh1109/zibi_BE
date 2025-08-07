@@ -30,4 +30,7 @@ public interface UserMapper {
 
     int resetPassword(SwaggerPasswordResetRequestDTO request);
     int insertUserInfo(@Param("usersIdx") int usersIdx);
+
+    String findUserRegionByIdx(@Param("userIdx") int userIdx);
+
 }
