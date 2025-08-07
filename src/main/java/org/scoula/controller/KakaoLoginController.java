@@ -25,7 +25,7 @@ public class KakaoLoginController {
      * @param code 카카오에서 전달하는 인가 코드
      * @return KakaoUserInfoDto + JWT
      */
-    @GetMapping("/callback")
+    @PostMapping("/callback")
     @ApiOperation(value = "카카오 로그인 콜백 처리", hidden = true)
     public ResponseEntity<AuthResultDTO> kakaoLogin(@RequestParam("code") String code) {
         log.info("카카오 인가 코드 수신: {}", code);
