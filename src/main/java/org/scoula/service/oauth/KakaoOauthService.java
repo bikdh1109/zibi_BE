@@ -47,7 +47,6 @@ public class KakaoOauthService {
         String accessToken = this.getAccessToken(code);
         KakaoUserInfoDto userInfo = this.getUserInfo(accessToken);
         log.info("userInfo: {}", userInfo.toString());
-
         MemberDTO user = this.processKakaoUser(userInfo);
 
         // JWT 발급 (JwtProcessor 사용)
