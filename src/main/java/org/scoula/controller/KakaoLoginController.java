@@ -14,7 +14,7 @@ import io.swagger.annotations.ApiOperation;
 @Log4j2
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/oauth/kakao")
+@RequestMapping("/v1/oauth/kakao")
 @Api(tags = "카카오 API", description = "카카오 소셜 로그인 관련 API")
 public class KakaoLoginController {
 
@@ -40,7 +40,7 @@ public class KakaoLoginController {
     @ApiOperation(value = "카카오 로그인 요청", notes = "카카오 인증 페이지로 리다이렉트합니다.")
     public String redirectToKakao() {
         String clientId = "53da207a5cc86b7ec03890c960d2937b";
-        String redirectUri = "http://localhost:8080/api/oauth/kakao/callback";
+        String redirectUri = "http://localhost:8080/v1/oauth/kakao/callback";
         return "redirect:https://kauth.kakao.com/oauth/authorize"
                 + "?client_id=" + clientId
                 + "&redirect_uri=" + redirectUri
