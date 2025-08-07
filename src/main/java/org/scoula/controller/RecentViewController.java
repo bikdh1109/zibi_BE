@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.scoula.dto.AllHouseListDTO;
 import org.scoula.dto.AptDetailDTO;
 import org.scoula.dto.GetRecentChecksDTO;
 import org.scoula.dto.RecentCheckDTO;
@@ -44,19 +45,9 @@ public class RecentViewController {
             String userId = jwtProcessor.getUsername(accessToken);
             int userIdx = userMapper.findUserIdxByUserId(userId);
 
-            List<GetRecentChecksDTO> recentList = recentCheckService.getRecentChecks(userIdx);
+            List<AllHouseListDTO> recentList = recentCheckService.getRecentChecks(userIdx);
 
-            // 상세 공고 리스트 생성
-            List<AptDetailDTO> detailList = new ArrayList<>();
-            for (GetRecentChecksDTO recent : recentList) {
-                String pblancNo = recent.getPblancNo();
-                AptDetailDTO detail = aptService.getAptDetail(pblancNo);
-                if (detail != null) {
-                    detailList.add(detail);
-                }
-            }
-
-            return ResponseEntity.ok(detailList);
+            return ResponseEntity.ok(recentList);
 
         } catch (Exception e) {
             log.error("최근 본 공고 조회 실패", e);
