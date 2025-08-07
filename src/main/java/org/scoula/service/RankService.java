@@ -63,11 +63,11 @@ public class RankService {
         String address = userMapper.findUserRegionByIdx(userIdx);
 
         Map<String, String> rankMap = new LinkedHashMap<>();
-        rankMap.put("85 이하", checkRank(85, houseType, specltRdnEarthAt, subscrptArea,
+        rankMap.put("85㎡ 이하", checkRank(85, houseType, specltRdnEarthAt, subscrptArea,
                 resFinalRoundNo, resAccountBalance, paymentPeriod, residenceStartDate, address));
-        rankMap.put("102 이하", checkRank(102, houseType, specltRdnEarthAt, subscrptArea,
+        rankMap.put("102㎡ 이하", checkRank(102, houseType, specltRdnEarthAt, subscrptArea,
                 resFinalRoundNo, resAccountBalance, paymentPeriod, residenceStartDate, address));
-        rankMap.put("135 이하", checkRank(135, houseType, specltRdnEarthAt, subscrptArea,
+        rankMap.put("135㎡ 이하", checkRank(135, houseType, specltRdnEarthAt, subscrptArea,
                 resFinalRoundNo, resAccountBalance, paymentPeriod, residenceStartDate, address));
         rankMap.put("모든 면적", checkRank(999, houseType, specltRdnEarthAt, subscrptArea,
                 resFinalRoundNo, resAccountBalance, paymentPeriod, residenceStartDate, address));
