@@ -3,6 +3,7 @@ package org.scoula.service.oauth;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.scoula.dto.oauth.KakaoUserInfoDto;
 import org.scoula.mapper.UserMapper;
 import org.scoula.security.dto.AuthDTO;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -27,7 +30,7 @@ import java.time.ZoneId;
 import java.util.Optional;
 //import org.scoula.domain.user.User;
 
-@Slf4j
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class KakaoOauthService {
@@ -42,6 +45,11 @@ public class KakaoOauthService {
 
     @Value("${kakao.redirect_url}")
     private String REDIRECT_URL;
+
+    @PostConstruct
+    public void printRedirectUrlOnStartup() {
+        log.info("🚀 [INIT] 주입된 kakao.redirect_url !!!!!!!!!!!!🔥🔥🔥🔥🔥🔥= {}", REDIRECT_URL);
+    }
 
     public AuthResultDTO processKakaoLogin(String code) {
         String accessToken = this.getAccessToken(code);
