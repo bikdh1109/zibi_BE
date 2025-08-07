@@ -186,11 +186,23 @@ public class KakaoOauthService {
     // MyBatis로 사용자 DB 처리
     public MemberDTO processKakaoUser(KakaoUserInfoDto userInfo) {
         MemberDTO existingUser = userMapper.findById(userInfo.getEmail());
+        log.info("----------> existing user: {}", existingUser);
+        // 이미 유저 정보가 저장되어 있을 경우
         if (existingUser != null) {
+            log.info("--------------->이미 있는 카카오 유저");
             userMapper.insertKakaoUserIdByUserId(userInfo.getEmail(),userInfo.getKakaoId());
             existingUser.setKakaoUserId(userInfo.getKakaoId());
+
+            log.info("@@@@@@@@@@@@@@@@이미 있는 카카오 유저");
+            log.info(existingUser.toString());
+            // ✅ authList 무조건 조회
+            int userIdx = userMapper.findUserIdxByUserId(existingUser.getUserId());
+            existingUser.setAuthList(userMapper.findAuthByUserIdx(userIdx));
+
+
             return existingUser;
         }
+        // 첫 로그인일 경우
         else {
             // 1) birthdate 계산
             String birthyear = userInfo.getBirthyear();
