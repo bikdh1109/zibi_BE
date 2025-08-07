@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+import java.util.Map;
+
 @Log4j2
 @RestController
 @RequiredArgsConstructor
@@ -20,17 +22,12 @@ public class KakaoLoginController {
 
     private final KakaoOauthService kakaoOauthService;
 
-    /**
-     * 카카오 인증 콜백 (Swagger UI에 노출되지 않음)
-     * @param code 카카오에서 전달하는 인가 코드
-     * @return KakaoUserInfoDto + JWT
-     */
     @PostMapping("/callback")
-    @ApiOperation(value = "카카오 로그인 콜백 처리", hidden = true)
-    public ResponseEntity<AuthResultDTO> kakaoLogin(@RequestParam("code") String code) {
+    public ResponseEntity<AuthResultDTO> kakaoLogin(@RequestBody Map<String, String> body) {
+        String code = body.get("code");
         log.info("카카오 인가 코드 수신: {}", code);
+
         AuthResultDTO userInfo = kakaoOauthService.processKakaoLogin(code);
-        log.info("userInfo 만듦: {}", userInfo);
         return ResponseEntity.ok(userInfo);
     }
 
