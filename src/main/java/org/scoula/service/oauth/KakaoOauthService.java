@@ -46,10 +46,6 @@ public class KakaoOauthService {
     @Value("${kakao.redirect_url}")
     private String REDIRECT_URL;
 
-    @PostConstruct
-    public void printRedirectUrlOnStartup() {
-        log.info("🚀 [INIT] 주입된 kakao.redirect_url !!!!!!!!!!!!🔥🔥🔥🔥🔥🔥= {}", REDIRECT_URL);
-    }
 
     public AuthResultDTO processKakaoLogin(String code) {
         String accessToken = this.getAccessToken(code);
@@ -74,6 +70,7 @@ public class KakaoOauthService {
 
 
     public String getAccessToken(String authorizationCode) {
+        log.info("💥 [DEBUG] getAccessToken() 사용 중인 REDIRECT_URL🔥🔥🔥🔥 = {}", REDIRECT_URL);
         String tokenUrl = "https://kauth.kakao.com/oauth/token";
 
         HttpHeaders headers = new HttpHeaders();    // HTTP 요청/응답 헤더를 다루기 위한 객체
