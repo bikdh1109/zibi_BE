@@ -29,16 +29,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     private Authentication getAuthentication(String token) {
-        if (token == null || token.isBlank()) return null;
         String username = jwtProcessor.getUsername(token);
-        if (username == null || username.isBlank()) return null;
-
-        try {
-            UserDetails ud = userDetailsService.loadUserByUsername(username);
-            return new UsernamePasswordAuthenticationToken(ud, null, ud.getAuthorities());
-        } catch (org.springframework.security.core.userdetails.UsernameNotFoundException | IllegalArgumentException ex) {
-            return null; // ✅ 인증 실패로만 처리
-        }
+        UserDetails principal = userDetailsService.loadUserByUsername(username);
+        return new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
     }
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -47,25 +40,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String bearer = req.getHeader(AUTHORIZATION_HEADER);
-        if (bearer != null && bearer.startsWith(BEARER_PREFIX)) {
-            String token = bearer.substring(BEARER_PREFIX.length());
+        String bearerToken=request.getHeader(AUTHORIZATION_HEADER);
+        if(bearerToken!=null && bearerToken.startsWith(BEARER_PREFIX)){
+            String token=bearerToken.substring(BEARER_PREFIX.length());
             try {
+
                 if (jwtProcessor.validateToken(token)) {
-                    Authentication auth = getAuthentication(token);
-                    if (auth != null) SecurityContextHolder.getContext().setAuthentication(auth);
-                    else SecurityContextHolder.clearContext();
+
+                    Authentication authentication = getAuthentication(token);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (Exception e) {
-                // ✅ 여기서도 절대 throw 금지
-                SecurityContextHolder.clearContext();
+
+                throw e; // super.doFilter()에서 catch됨
             }
+
         }
-        chain.doFilter(req, res);
+        super.doFilter(request,response,filterChain);
     }
 }
-
-
