@@ -3,6 +3,7 @@ package org.scoula.service.oauth;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.scoula.dto.oauth.KakaoUserInfoDto;
 import org.scoula.mapper.UserMapper;
 import org.scoula.security.dto.AuthDTO;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -27,7 +30,7 @@ import java.time.ZoneId;
 import java.util.Optional;
 //import org.scoula.domain.user.User;
 
-@Slf4j
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class KakaoOauthService {
@@ -43,11 +46,11 @@ public class KakaoOauthService {
     @Value("${kakao.redirect_url}")
     private String REDIRECT_URL;
 
+
     public AuthResultDTO processKakaoLogin(String code) {
         String accessToken = this.getAccessToken(code);
         KakaoUserInfoDto userInfo = this.getUserInfo(accessToken);
         log.info("userInfo: {}", userInfo.toString());
-
         MemberDTO user = this.processKakaoUser(userInfo);
 
         // JWT 발급 (JwtProcessor 사용)
@@ -67,6 +70,7 @@ public class KakaoOauthService {
 
 
     public String getAccessToken(String authorizationCode) {
+        log.info("💥 [DEBUG] getAccessToken() 사용 중인 REDIRECT_URL🔥🔥🔥🔥 = {}", REDIRECT_URL);
         String tokenUrl = "https://kauth.kakao.com/oauth/token";
 
         HttpHeaders headers = new HttpHeaders();    // HTTP 요청/응답 헤더를 다루기 위한 객체
