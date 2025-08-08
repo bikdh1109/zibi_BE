@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -41,6 +42,7 @@ public class KakaoOauthService {
     private final ObjectMapper objectMapper = new ObjectMapper();   // Java 객체 ↔ JSON 문자열 변환을 담당
     private final UserMapper userMapper;
     private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${kakao.rest_key}")
     private String REST_API_KEY;
@@ -219,13 +221,14 @@ public class KakaoOauthService {
             LocalDate localDate = LocalDate.parse(birthyearday, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             Date birthdate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             String code = emailService.generateCode();
+
             // 2) Builder로 MemberDTO 생성
             MemberDTO kakaoUser = MemberDTO.builder()
                     .kakaoUserId(userInfo.getKakaoId())
                     .userId(userInfo.getEmail())
                     .userName(userInfo.getName())
                     .address(userInfo.getShippingAddress())
-                    .password(code)
+                    .password(passwordEncoder.encode(code))
                     .birthdate(birthdate)
                     .build();
 
