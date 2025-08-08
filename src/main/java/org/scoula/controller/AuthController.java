@@ -10,6 +10,7 @@ import org.scoula.service.AuthService;
 import org.scoula.service.UserService;
 import org.scoula.util.TokenUtils;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -97,6 +98,7 @@ public class AuthController {
 
         try {
             userService.deleteUser(userId /*request.getPassword()*/);
+            SecurityContextHolder.clearContext();
             return ResponseEntity.ok(Map.of("message", "회원 탈퇴 완료!"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
