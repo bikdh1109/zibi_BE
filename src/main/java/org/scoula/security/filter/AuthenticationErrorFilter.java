@@ -18,16 +18,19 @@ import java.security.SignatureException;
 @Component
 public class AuthenticationErrorFilter extends OncePerRequestFilter {
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+            throws IOException, ServletException {
         try {
-            super.doFilter(request, response, filterChain);
-        } catch (ExpiredJwtException e) {
-            JsonResponse.sendError(response, HttpStatus.UNAUTHORIZED, "토큰의 유효시간이 지났습니다.");
-        } catch (UnsupportedJwtException | MalformedJwtException e) {
-            JsonResponse.sendError(response, HttpStatus.UNAUTHORIZED, e.getMessage());
-        } catch (ServletException e) {
-            JsonResponse.sendError(response, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            chain.doFilter(req, res); // ✅ 이거!
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            JsonResponse.sendError(res, HttpStatus.UNAUTHORIZED, "토큰의 유효시간이 지났습니다.");
+        } catch (io.jsonwebtoken.UnsupportedJwtException | io.jsonwebtoken.MalformedJwtException e) {
+            JsonResponse.sendError(res, HttpStatus.UNAUTHORIZED, e.getMessage());
+        } catch (io.jsonwebtoken.security.SignatureException e) {
+            JsonResponse.sendError(res, HttpStatus.UNAUTHORIZED, "토큰 서명 검증 실패");
+        } catch (Exception e) {
+            // ✅ 남는 예외도 500 JSON으로 마무리 (톰캣 HTML 금지)
+            JsonResponse.sendError(res, HttpStatus.INTERNAL_SERVER_ERROR, "인증 처리 중 오류");
         }
     }
 }
