@@ -33,7 +33,6 @@ public class KakaoMapInfraService {
     }
 
     public void fetchAndSavePlacesForAll() {
-
         List<AptDTO> aptList = aptMapper.findAllAptLocations();
         List<OfficetelDTO> officetelList = aptMapper.findAllOfficetelLocations();
 
@@ -84,29 +83,20 @@ public class KakaoMapInfraService {
                 place.setOfficetelIdx(officetelIdx);
                 place.setPlaceType(placeType);
 
-                boolean exists = placeMapper.existsPlace(
-                        aptIdx != null ? aptIdx : officetelIdx,
-                        place.getPlaceName(),
-                        place.getAddress(),
-                        placeType
-                );
-
-                if (!exists) {
-                    switch (placeType) {
-                        case "hospital": placeMapper.insertHospital(place); break;
-                        case "school": placeMapper.insertSchool(place); break;
-                        case "mart": placeMapper.insertMart(place); break;
-                        case "subway": placeMapper.insertSubway(place); break;
-                        case "kindergarten": placeMapper.insertKindergarten(place); break;
-                    }
-                    log.info("저장 완료: {} {} {}", aptIdx != null ? "aptIdx=" + aptIdx : "officetelIdx=" + officetelIdx, placeType, place.getPlaceName());
-                } else {
-                    log.info("중복 저장 안 함: {} {} {}", aptIdx != null ? "aptIdx=" + aptIdx : "officetelIdx=" + officetelIdx, placeType, place.getPlaceName());
+                // ✅ 중복 체크 없이 항상 UPSERT
+                switch (placeType) {
+                    case "hospital":     placeMapper.insertHospital(place); break;
+                    case "school":       placeMapper.insertSchool(place); break;
+                    case "mart":         placeMapper.insertMart(place); break;
+                    case "subway":       placeMapper.insertSubway(place); break;
+                    case "kindergarten": placeMapper.insertKindergarten(place); break;
                 }
+                log.info("UPSERT 완료: {} {} {}", aptIdx != null ? "aptIdx=" + aptIdx : "officetelIdx=" + officetelIdx, placeType, place.getPlaceName());
             }
         }
     }
 
+    @SuppressWarnings("unchecked")
     private List<PlaceDTO> searchByCategory(double latitude, double longitude,
                                             String categoryCode, int radius, String placeType) {
         int page = 1;
@@ -114,7 +104,6 @@ public class KakaoMapInfraService {
         List<PlaceDTO> allResults = new ArrayList<>();
 
         while (true) {
-
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(CATEGORY_SEARCH_URL)
                     .queryParam("category_group_code", categoryCode)
                     .queryParam("x", longitude)
@@ -150,7 +139,7 @@ public class KakaoMapInfraService {
                 dto.setAddress(roadAddress != null && !roadAddress.isEmpty() ? roadAddress : jibunAddress);
 
                 String distanceStr = (String) doc.get("distance");
-                dto.setDistance(distanceStr != null && !distanceStr.isEmpty() ? Integer.parseInt(distanceStr) : 0);
+                dto.setDistance(distanceStr != null && !distanceStr.isEmpty() ? Long.parseLong(distanceStr) : 0);
 
                 dto.setLatitude(Double.parseDouble((String) doc.get("y")));
                 dto.setLongitude(Double.parseDouble((String) doc.get("x")));
@@ -177,7 +166,7 @@ public class KakaoMapInfraService {
             case "hospital":
                 return allResults.stream()
                         .filter(place -> isLargeHospital(place.getCategoryName()))
-                        .sorted(Comparator.comparingInt(PlaceDTO::getDistance))
+                        .sorted(Comparator.comparingLong(PlaceDTO::getDistance))
                         .limit(5)
                         .toList();
 
@@ -185,13 +174,13 @@ public class KakaoMapInfraService {
                 return allResults.stream()
                         .filter(place -> place.getCategoryName() != null
                                 && place.getCategoryName().contains("대형마트"))
-                        .sorted(Comparator.comparingInt(PlaceDTO::getDistance))
+                        .sorted(Comparator.comparingLong(PlaceDTO::getDistance))
                         .limit(5)
                         .toList();
 
             default:
                 return allResults.stream()
-                        .sorted(Comparator.comparingInt(PlaceDTO::getDistance))
+                        .sorted(Comparator.comparingLong(PlaceDTO::getDistance))
                         .limit(5)
                         .toList();
         }
