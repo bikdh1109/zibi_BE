@@ -436,5 +436,11 @@
         WHERE apt_pblanc = #{pblancNo}
     </select>
 
+    <select id="findRegionByPblancNo" resultType="java.lang.String">
+    SELECT subscrpt_area_code_nm
+    FROM apt_table
+    WHERE pblanc_no = #{pblancNo}
+    </select>
+
 
 </mapper>
