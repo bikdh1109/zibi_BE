@@ -25,7 +25,7 @@ class PythonApiServiceTest {
     @Test
     @DisplayName("파이썬 요청 보내는 빌더")
     void buildPythonAptReqeust() {
-        PythonAptRequestDTO dto = pythonApiService.buildPythonAptReqeust(43,"2025000266");
+        PythonAptRequestDTO dto = pythonApiService.buildPythonAptRequest(43,"2025000266");
         log.info(dto.toString());
     }
 
