@@ -11,11 +11,13 @@ import org.scoula.security.dto.AuthResultDTO;
 import org.scoula.security.dto.MemberDTO;
 import org.scoula.security.dto.UserInfoDTO;
 import org.scoula.security.util.JwtProcessor;
+import org.scoula.service.EmailService;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -39,6 +41,8 @@ public class KakaoOauthService {
     private final RestTemplate restTemplate = new RestTemplate();   // Spring에서 제공하는 HTTP 통신용 클라이언트 클래스, Rest API 서버와 GET, POST, PUT DELETE 등 요청을 주고 받을때 사용
     private final ObjectMapper objectMapper = new ObjectMapper();   // Java 객체 ↔ JSON 문자열 변환을 담당
     private final UserMapper userMapper;
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${kakao.rest_key}")
     private String REST_API_KEY;
@@ -216,6 +220,7 @@ public class KakaoOauthService {
                     + birthday.substring(2, 4);
             LocalDate localDate = LocalDate.parse(birthyearday, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             Date birthdate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            String code = emailService.generateCode();
 
             // 2) Builder로 MemberDTO 생성
             MemberDTO kakaoUser = MemberDTO.builder()
@@ -223,7 +228,7 @@ public class KakaoOauthService {
                     .userId(userInfo.getEmail())
                     .userName(userInfo.getName())
                     .address(userInfo.getShippingAddress())
-                    .password(null)
+                    .password(passwordEncoder.encode(code))
                     .birthdate(birthdate)
                     .build();
 
