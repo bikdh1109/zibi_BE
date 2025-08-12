@@ -28,4 +28,6 @@ public interface SelectedMapper {
     int upsertSelectedHomeSize(@Param("userInfoIdx") int userInfoIdx,
                                @Param("homeSize") HomeSizeDTO homeSize,
                                @Param("userRank") int userRank);
+
+    Integer getUserRankByUsersIdx(@Param("usersIdx") int userIdx);
 }

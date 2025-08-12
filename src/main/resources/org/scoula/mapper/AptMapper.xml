@@ -406,12 +406,12 @@
     </select>
 
     <select id="getInfraPlace" resultType="org.scoula.dto.InfraPlaceDTO">
-        SELECT place_type, place_idx, place_name, distance, road_address_name
+        SELECT place_type, place_idx, place_name, distance, road_address_name,longitude,latitude
         FROM vw_infra_places WHERE apt_idx = #{aptIdx}
     </select>
 
     <select id="getOfficetelInfraPlace" resultType="org.scoula.dto.InfraPlaceDTO">
-        SELECT place_type, place_idx, place_name, distance, road_address_name
+        SELECT place_type, place_idx, place_name, distance, road_address_name,longitude,latitude
         FROM vw_infra_places WHERE officetel_idx = #{officetelIdx}
     </select>
 
@@ -434,6 +434,12 @@
     <select id="countFavoritesByPblancNo" resultType="int">
         SELECT COUNT(*) FROM user_favorite
         WHERE apt_pblanc = #{pblancNo}
+    </select>
+
+    <select id="findRegionByPblancNo" resultType="java.lang.String">
+    SELECT subscrpt_area_code_nm
+    FROM apt_table
+    WHERE pblanc_no = #{pblancNo}
     </select>
 
 
