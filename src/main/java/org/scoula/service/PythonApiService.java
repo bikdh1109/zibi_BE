@@ -38,7 +38,7 @@ public class PythonApiService {
             log.info("usersIdx {}의 사용자 지역: {}", usersIdx, userRegion);
 
 
-            String aptRegion = aptMapper.findRegionByPblancNo(pblancNo);
+            String aptRegion = aptMapper.findRegionByAptPblancNo(pblancNo);
             log.info("pblancNo {}의 아파트 지역: {}", pblancNo, aptRegion);
 
 
