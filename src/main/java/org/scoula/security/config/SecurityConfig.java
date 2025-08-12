@@ -64,13 +64,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:5173");
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
+        config.setAllowCredentials(true); // 쿠키/인증정보 허용
+        config.addAllowedOriginPattern("*"); // 모든 도메인 허용
+        config.addAllowedHeader("*"); // 모든 헤더 허용
+        config.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
+
 
 
 

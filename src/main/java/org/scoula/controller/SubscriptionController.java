@@ -69,7 +69,7 @@ public class SubscriptionController {
             @ApiResponse(code = 401, message = "인증 실패"),
             @ApiResponse(code = 500, message = "서버 오류")
     })
-    public ResponseEntity<?> getApartmentDetail(@RequestHeader("Authorization") String bearerToken,@ApiParam(value = "아파트 공고번호", example = "2025000306", required = true) @RequestParam("pblanc_no") String pblancNo) {
+    public ResponseEntity<?> getApartmentDetail(@ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken,@ApiParam(value = "아파트 공고번호", example = "2025000306", required = true) @RequestParam("pblanc_no") String pblancNo) {
         try {
             log.info("📌 getAptDetail 진입 - pblancNo={}, bearerToken={}", pblancNo, bearerToken);
             String accessToken = tokenUtils.extractAccessToken(bearerToken);
@@ -90,7 +90,7 @@ public class SubscriptionController {
 
     @GetMapping("/officetels/detail")
     public ResponseEntity<?> getOfficetelDetail(
-            @RequestHeader("Authorization") String bearerToken,
+            @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken,
             @ApiParam(value = "오피스텔 공고번호", example = "2025950040", required = true)
             @RequestParam("pblanc_no") String pblancNo) {
         try {
