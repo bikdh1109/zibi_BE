@@ -406,12 +406,12 @@
     </select>
 
     <select id="getInfraPlace" resultType="org.scoula.dto.InfraPlaceDTO">
-        SELECT place_type, place_idx, place_name, distance, road_address_name
+        SELECT place_type, place_idx, place_name, distance, road_address_name,longitude,latitude
         FROM vw_infra_places WHERE apt_idx = #{aptIdx}
     </select>
 
     <select id="getOfficetelInfraPlace" resultType="org.scoula.dto.InfraPlaceDTO">
-        SELECT place_type, place_idx, place_name, distance, road_address_name
+        SELECT place_type, place_idx, place_name, distance, road_address_name,longitude,latitude
         FROM vw_infra_places WHERE officetel_idx = #{officetelIdx}
     </select>
 
