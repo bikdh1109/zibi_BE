@@ -1,5 +1,6 @@
 package org.scoula.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,5 +8,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class PredictResponseDTO {
-    private double winProbability;
+    @JsonProperty("probability")
+    private Double probability;
 }
