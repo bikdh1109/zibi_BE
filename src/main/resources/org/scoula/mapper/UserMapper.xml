@@ -105,6 +105,11 @@
         SET kakao_user_id = #{kakaoUserId}
         WHERE user_id       = #{userId}
     </update>
+    <update id="initFcmTokenByIdx">
+        UPDATE users
+        SET fcm_token = null
+        WHERE users_idx = #{userIdx}
+    </update>
 
     <select id="findUserRegionByIdx" parameterType="int" resultType="String">
         SELECT address
