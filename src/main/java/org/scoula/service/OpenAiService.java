@@ -2,6 +2,8 @@ package org.scoula.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -11,11 +13,13 @@ import java.util.*;
 @Log4j2
 @Service
 @RequiredArgsConstructor
+@PropertySource("classpath:/application.properties")
 public class OpenAiService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private static final String OPENAI_API_KEY = "YOUR_OPENAI_KEY";
+    @Value("${gpt.openApiKey}")
+    private  String OPENAI_API_KEY;
     private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 
     public String askOpenAi(String userInput) {
@@ -31,7 +35,7 @@ public class OpenAiService {
                             "질문이 불명확할 경우 '좀 더 자세히 말씀해주시면 정확하게 안내드릴 수 있어요.'처럼 정중하게 요청해줘.",
                             "목표는 청약 제도를 처음 접하는 사용자도 안심하고 이해할 수 있도록 돕는 것이야.",
                             "청약 정보는 실제 제도 기준에 따라 정확하게 안내하고, 최신 정보를 기준으로 설명해.",
-                            "설명이 너무 길어지지 않게 모든 대답은 100자 길면 150자 이내로 대답해줘"
+                            "설명이 너무 길어지지 않게 모든 대답은 100자 길면 200자 이내로 대답해줘"
                     )
             );
             Map<String, String> userMsg = Map.of("role", "user", "content", userInput);

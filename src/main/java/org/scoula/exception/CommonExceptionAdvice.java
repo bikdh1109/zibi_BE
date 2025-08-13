@@ -48,6 +48,6 @@ public class CommonExceptionAdvice {
         log.error("Unhandled exception at {} {}", req.getMethod(), req.getRequestURI(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body("{\"error\":\"당첨확률을 알 수 없습니다. 잠시 후 다시 시도해 주세요.\"}");
+                .body("{\"error\":\" 잠시 후 다시 시도해 주세요.\"}");
     }
 }
