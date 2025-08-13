@@ -79,7 +79,14 @@ public class RecommendationService {
         }
 
         // 정렬
-        Map<Integer, HouseListDTO> sortedMap = new TreeMap<>(wintProbability);
+        Map<Integer, HouseListDTO> sortedMap = new TreeMap<>(Collections.reverseOrder());
+        sortedMap.putAll(wintProbability);
+        // sortedMap 로그찍기
+        for (Map.Entry<Integer, HouseListDTO> entry : sortedMap.entrySet()) {
+            Integer key = entry.getKey();
+            HouseListDTO house = entry.getValue();
+            log.info("[REC] sortedMap key={} housePblancNo={} houseType={}", key, house.getPblancNo(), house.getHouseType());
+        }
         List<HouseListDTO> winProbabilityList = new ArrayList<>(sortedMap.values());
         log.info("[REC] done. totalSelected={} elapsedMs={}", winProbabilityList.size(), (System.currentTimeMillis() - t0));
         return winProbabilityList;
