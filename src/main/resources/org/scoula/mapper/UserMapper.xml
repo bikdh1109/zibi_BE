@@ -116,5 +116,10 @@
         FROM users
         WHERE users_idx = #{userIdx}
     </select>
+    <select id="findFcmTokenByUserIdx" resultType="java.lang.String">
+        SELECT fcm_token
+        FROM users
+        WHERE users_idx = #{userIdx}
+    </select>
 
 </mapper>

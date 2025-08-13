@@ -33,5 +33,6 @@ public interface UserMapper {
 
     String findUserRegionByIdx(@Param("userIdx") int userIdx);
     Integer initFcmTokenByIdx(@Param("userIdx") int userIdx);
+    String findFcmTokenByUserIdx(@Param("userIdx") int userIdx);
 
 }
