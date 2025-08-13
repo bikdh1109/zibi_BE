@@ -436,11 +436,33 @@
         WHERE apt_pblanc = #{pblancNo}
     </select>
 
-    <select id="findRegionByPblancNo" resultType="java.lang.String">
-    SELECT subscrpt_area_code_nm
-    FROM apt_table
-    WHERE pblanc_no = #{pblancNo}
+    <select id="getAptSuplyHshldco" resultType="int">
+        SELECT SUM(suply_hshldco)
+        FROM apt_type
+        WHERE apt_idx = #{aptIdx}
     </select>
 
+    <select id="getAptspsplyHshldco" resultType="int">
+        SELECT SUM(spsply_hshldco)
+        FROM apt_type
+        WHERE apt_idx = #{aptIdx}
+    </select>
 
+    <select id="getOfficetelType" resultType="org.scoula.dto.OfficetelTypeDTO">
+        SELECT *
+        FROM officetel_type
+        WHERE officetel_idx = #{officetelIdx}
+    </select>
+
+    <select id="findRegionByAptPblancNo" resultType="String">
+        SELECT subscrpt_area_code_nm
+        FROM apt_table
+        WHERE pblanc_no = #{pblancNo}
+    </select>
+
+    <select id="findRegionByOfficetelPblancNo" resultType="String">
+        SELECT subscrpt_area_code_nm
+        FROM officetel_table
+        WHERE pblanc_no = #{pblancNo}
+    </select>
 </mapper>

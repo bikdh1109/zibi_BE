@@ -30,11 +30,11 @@ public class ChatBotController {
         if (faqAnswer != null) {
             return ResponseEntity.ok(new ChatResponse(faqAnswer));
         }
-        return ResponseEntity.ok(Map.of("response","유료결제가 필요합니다"));
 
 
-//        // 2. OpenAI 호출
-//        String aiAnswer = openAiService.askOpenAi(userInput);
-//        return ResponseEntity.ok(new ChatResponse(aiAnswer));
+
+        // 2. OpenAI 호출
+        String aiAnswer = openAiService.askOpenAi(userInput);
+        return ResponseEntity.ok(new ChatResponse(aiAnswer));
       }
     }

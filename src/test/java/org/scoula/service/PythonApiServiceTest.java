@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.scoula.config.RootConfig;
 import org.scoula.dto.PythonAptRequestDTO;
+import org.scoula.dto.PythonOfficetelRequestDTO;
 import org.scoula.mapper.SelectedMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -39,6 +40,11 @@ class PythonApiServiceTest {
     void checkResideCode() {
         int i = pythonApiService.checkResideCode(70, "2025000303");
         System.out.println("🔥🔥🔥🔥🔥🔥🔥🔥i = " + i);
+    }
 
+    @Test
+    void buildPythonOfficetelRequest(){
+        PythonOfficetelRequestDTO dto = pythonApiService.buildPythonOfficetelRequest(43, "2025950037");
+        log.info(dto.toString());
     }
 }

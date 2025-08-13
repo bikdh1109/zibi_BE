@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.scoula.dto.PredictResponseDTO;
 import org.scoula.dto.PythonAptRequestDTO;
+import org.scoula.dto.PythonOfficetelRequestDTO;
 import org.scoula.mapper.*;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,8 @@ import java.util.Map;
 public class PythonApiService {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String PYTHON_API_URL = "http://13.209.161.22/predict/apt";
+    private final String PYTHON_APT_URL = "http://13.209.161.22/predict/apt";
+    private final String PYTHON_OFFICETEL_URL = "http://13.209.161.22/predict/officetel";
     private final ProbabilityMapper probabilityMapper;
     private final UserMapper userMapper;
     private final AptMapper aptMapper;
@@ -36,7 +38,7 @@ public class PythonApiService {
             log.info("usersIdx {}의 사용자 지역: {}", usersIdx, userRegion);
 
 
-            String aptRegion = aptMapper.findRegionByPblancNo(pblancNo);
+            String aptRegion = aptMapper.findRegionByAptPblancNo(pblancNo);
             log.info("pblancNo {}의 아파트 지역: {}", pblancNo, aptRegion);
 
 
@@ -109,7 +111,7 @@ public class PythonApiService {
 
         try {
             ResponseEntity<PredictResponseDTO> response = restTemplate.postForEntity(
-                    PYTHON_API_URL,
+                    PYTHON_APT_URL,
                     request,
                     PredictResponseDTO.class
             );
@@ -139,5 +141,50 @@ public class PythonApiService {
             return Map.of("error", "알 수 없는 오류가 발생했습니다.");
         }
     }
+
+    public PythonOfficetelRequestDTO buildPythonOfficetelRequest(Integer usersIdx, String pblancNo) {
+        PythonOfficetelRequestDTO info = probabilityMapper.getPythonOfficetelInfoByPblancNo(pblancNo);
+        return info;
+    }
+
+    public Map<String, Object> requestOfficetelPrediction(PythonOfficetelRequestDTO input) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<PythonOfficetelRequestDTO> request = new HttpEntity<>(input, headers);
+
+        try {
+            ResponseEntity<PredictResponseDTO> response = restTemplate.postForEntity(
+                    PYTHON_OFFICETEL_URL,
+                    request,
+                    PredictResponseDTO.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                return Map.of("probability", response.getBody().getProbability());
+            } else {
+                return Map.of("error", "FastAPI 예측 요청 실패", "status", response.getStatusCodeValue());
+            }
+
+        } catch (HttpClientErrorException e) {
+            // FastAPI에서 보낸 4xx 응답 바디 추출
+            String errorBody = e.getResponseBodyAsString();
+            log.error("FastAPI 4xx 오류: {}", errorBody);
+
+            // 예: {"detail":[{"loc":["body","house_rank"],"msg":"Input should be a valid integer"}]}
+            return Map.of(
+                    "error", "입력값을 다시 확인해 주세요.",
+                    "detail", errorBody
+            );
+
+        } catch (HttpServerErrorException e) {
+            log.error("FastAPI 5xx 오류: {}", e.getResponseBodyAsString());
+            return Map.of("error", "FastAPI 서버 오류", "detail", e.getResponseBodyAsString());
+        } catch (Exception e) {
+            log.error("FastAPI 호출 중 알 수 없는 오류", e);
+            return Map.of("error", "알 수 없는 오류가 발생했습니다.");
+        }
+    }
+
 
 }

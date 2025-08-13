@@ -25,9 +25,11 @@ public interface SelectedMapper {
     List<HomeSizeDTO> selectSelectedHomesize(int userInfoIdx);
     List<HomeTypeDTO> selectSelectedHometype(int userInfoIdx);
 
+    int getUserRankByUserInfoIdx(int userInfoIdx);
+
     int upsertSelectedHomeSize(@Param("userInfoIdx") int userInfoIdx,
                                @Param("homeSize") HomeSizeDTO homeSize,
                                @Param("userRank") int userRank);
 
-    Integer getUserRankByUsersIdx(@Param("usersIdx") int userIdx);
+    Integer getUserRankByUsersIdx(@Param("userInfoIdx") int userInfoIdx);
 }
