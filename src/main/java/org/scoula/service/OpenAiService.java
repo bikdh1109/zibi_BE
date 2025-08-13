@@ -2,6 +2,8 @@ package org.scoula.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -11,11 +13,13 @@ import java.util.*;
 @Log4j2
 @Service
 @RequiredArgsConstructor
+@PropertySource("classpath:/application.properties")
 public class OpenAiService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private static final String OPENAI_API_KEY = "Your Service Key";
+    @Value("${gpt.openApiKey}")
+    private  String OPENAI_API_KEY;
     private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 
     public String askOpenAi(String userInput) {
