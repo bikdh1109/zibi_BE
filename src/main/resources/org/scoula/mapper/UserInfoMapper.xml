@@ -6,7 +6,7 @@
 <mapper namespace="org.scoula.mapper.UserInfoMapper">
 
     <select id="getUserInfoByUsersIdx" parameterType="int" resultType="org.scoula.dto.UserInfoDTO">
-        SELECT hope_max_price, hope_min_price, total_ga_score, marital_status
+        SELECT user_info_idx, hope_max_price, hope_min_price, total_ga_score, marital_status
         FROM user_info
         WHERE users_idx = #{usersIdx}
     </select>

@@ -24,12 +24,16 @@
         FROM vw_all_house_list
         WHERE si = #{region.si}
           AND sigungu = #{region.gunGu}
-          AND CAST(min_price AS DECIMAL(15,0)) >= #{preference.hopeMinPrice}
-          AND CAST(max_price AS DECIMAL(15,0)) <= #{preference.hopeMaxPrice}
-          AND min_area >= #{preference.minHomeSize}
-          AND max_area <= #{preference.maxHomeSize}
           AND (
-            (#{preference.maritalStatus} = 1 AND (house_type IN ('APT','신혼희망타운'))
+            CAST(min_price AS DECIMAL(15, 0)) BETWEEN #{preference.hopeMinPrice} AND #{preference.hopeMaxPrice}
+                OR CAST(max_price AS DECIMAL(15, 0)) BETWEEN #{preference.hopeMinPrice} AND #{preference.hopeMaxPrice}
+            )
+          AND (
+            (min_area BETWEEN #{preference.minHomeSize} AND #{preference.maxHomeSize})
+                OR (max_area BETWEEN #{preference.minHomeSize} AND #{preference.maxHomeSize})
+            )
+          AND (
+            (#{preference.maritalStatus} = 1 AND (house_type IN ('APT','신혼희망타운')))
                 OR (#{preference.maritalStatus} = 0 AND house_type IN ('APT'))
             )
         ]]>
@@ -41,12 +45,16 @@
         FROM vw_all_house_list
         WHERE si = #{region.si}
           AND sigungu = #{region.gunGu}
-          AND CAST(min_price AS DECIMAL(15,0)) >= #{preference.hopeMinPrice}
-          AND CAST(max_price AS DECIMAL(15,0)) <= #{preference.hopeMaxPrice}
-          AND min_area >= #{preference.minHomeSize}
-          AND max_area <= #{preference.maxHomeSize}
           AND (
-            (#{preference.maritalStatus} = 1 AND (house_type IN ('오피스텔','도시형생활주택'))
+            CAST(min_price AS DECIMAL(15, 0)) BETWEEN #{preference.hopeMinPrice} AND #{preference.hopeMaxPrice}
+                OR CAST(max_price AS DECIMAL(15, 0)) BETWEEN #{preference.hopeMinPrice} AND #{preference.hopeMaxPrice}
+            )
+          AND (
+            (min_area BETWEEN #{preference.minHomeSize} AND #{preference.maxHomeSize})
+                OR (max_area BETWEEN #{preference.minHomeSize} AND #{preference.maxHomeSize})
+            )
+          AND (
+            (#{preference.maritalStatus} = 1 AND (house_type IN ('오피스텔','도시형생활주택')))
                 OR (#{preference.maritalStatus} = 0 AND house_type IN ('오피스텔'))
                 )
         ]]>

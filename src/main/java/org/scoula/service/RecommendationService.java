@@ -21,101 +21,222 @@ public class RecommendationService {
     private final AptMapper aptMapper;
     private final SelectedMapper selectedMapper;
 
-    public HashMap<Integer, HouseListDTO> wintProbability = new HashMap<>();
+    /** 정렬을 위해 확률(정수 %)을 key 로 사용 */
+    public final Map<Integer, HouseListDTO> wintProbability = new HashMap<>();
+
     public List<HouseListDTO> getRecommendationList(Integer usersIdx) {
+        long t0 = System.currentTimeMillis();
+        log.info("[REC] getRecommendationList start usersIdx={}", usersIdx);
+
+        if (usersIdx == null) {
+            log.error("[REC] usersIdx is null");
+            return List.of();
+        }
 
         UserInfoDTO userInfo = userInfoMapper.getUserInfoByUsersIdx(usersIdx);
+        if (userInfo == null) {
+            log.warn("[REC] userInfo not found for usersIdx={}", usersIdx);
+            return List.of();
+        }
+        log.debug("[REC] userInfo={}", userInfo);
 
         PreferenceDTO preference = getPreferenceInfo(usersIdx, userInfo);
-        List<RegionDTO> siGungu = preference.getSiGunGu();
+        if (preference == null) {
+            log.error("[REC] preference is null for usersIdx={}", usersIdx);
+            return List.of();
+        }
+        List<RegionDTO> siGungu = Optional.ofNullable(preference.getSiGunGu()).orElseGet(List::of);
+        log.info("[REC] preference regions={} homeTypes={}", siGungu.size(), preference.getHomeType());
 
-        // 선택한 모든 선호 지역에 대한 청약 공고를 가져오기위해 반복문 사용
+        wintProbability.clear();
+
+        // 모든 선호 지역 순회
         for (RegionDTO region : siGungu) {
-            // 선호 아파트 타입으로 아파트를 선택한 경우
-            if (preference.getHomeType().contains("APT")) {
-                List<HouseListDTO> aptHouseList = houseListMapper.getAptRecommendationList(region, preference);
-                getAptReqDTO(usersIdx, aptHouseList, userInfo);
+            if (region == null) continue;
+            log.info("[REC] region loop si={}, sigungu={}", region.getSi(), region.getGunGu());
+
+            // APT
+            try {
+                if (preference.getHomeType() != null && preference.getHomeType().contains("APT")) {
+                    List<HouseListDTO> aptHouseList = houseListMapper.getAptRecommendationList(region, preference);
+                    log.info("[REC] APT candidates={}", aptHouseList == null ? 0 : aptHouseList.size());
+                    getAptReqDTO(usersIdx, Optional.ofNullable(aptHouseList).orElseGet(List::of), userInfo);
+                }
+            } catch (Exception e) {
+                log.error("[REC] APT list failed for region={} error={}", region, e.toString(), e);
             }
-            // 선호 매물 타입으로 오피스텔을 선택한 경우
-            if (preference.getHomeType().contains("오피스텔")) {
-                List<HouseListDTO> officetelHouseList = houseListMapper.getOfficetelRecommendationList(region, preference);
-                getOfficetelReqDTO(usersIdx, officetelHouseList, userInfo);
+
+            // 오피스텔
+            try {
+                if (preference.getHomeType() != null && preference.getHomeType().contains("오피스텔")) {
+                    List<HouseListDTO> officetelHouseList = houseListMapper.getOfficetelRecommendationList(region, preference);
+                    log.info("[REC] Officetel candidates={}", officetelHouseList == null ? 0 : officetelHouseList.size());
+                    getOfficetelReqDTO(usersIdx, Optional.ofNullable(officetelHouseList).orElseGet(List::of), userInfo);
+                }
+            } catch (Exception e) {
+                log.error("[REC] Officetel list failed for region={} error={}", region, e.toString(), e);
             }
         }
 
-        // 선호 정보에 맞는 청약 리스트 정렬
+        // 정렬
         Map<Integer, HouseListDTO> sortedMap = new TreeMap<>(wintProbability);
         List<HouseListDTO> winProbabilityList = new ArrayList<>(sortedMap.values());
+        log.info("[REC] done. totalSelected={} elapsedMs={}", winProbabilityList.size(), (System.currentTimeMillis() - t0));
         return winProbabilityList;
     }
 
     public void getAptReqDTO(int usersIdx, List<HouseListDTO> aptHouseList, UserInfoDTO userInfo) {
+        log.debug("[REC/APT] start items={}", aptHouseList.size());
 
         for (HouseListDTO house : aptHouseList) {
+            if (house == null) continue;
             String pblancNo = house.getPblancNo();
-            PythonAptRequestDTO aptReqDTO = new PythonAptRequestDTO();
+            log.debug("[REC/APT] house pblancNo={}", pblancNo);
 
-            int aptIdx = aptMapper.findAptIdxByPblancNo(pblancNo);
-            AptTypeDTO aptType = aptMapper.getAptType(aptIdx);
+            try {
+                PythonAptRequestDTO aptReqDTO = new PythonAptRequestDTO();
 
-            aptReqDTO.setGnsplyHshldco(aptType.getSuplyHshldco());
-            aptReqDTO.setSpsplyHshldco(aptType.getSpsplyHshldco());
-            aptReqDTO.setSi(house.getSi());
-            aptReqDTO.setSigungu(house.getSigungu());
-            aptReqDTO.setTotSuplyHshldco(aptType.getSuplyHshldco() + aptType.getSpsplyHshldco());
-            aptReqDTO.setSuplyHshldco(aptType.getSuplyHshldco() + aptType.getSpsplyHshldco());
-            aptReqDTO.setHouseRank(selectedMapper.getUserRankByUserInfoIdx(userInfo.getUserInfoIdx()));
-            aptReqDTO.setScore(userInfo.getTotalGaScore());
+                int aptIdx = aptMapper.findAptIdxByPblancNo(pblancNo);
+//                AptTypeDTO aptType = aptMapper.getAptType(aptIdx);
+//                if (aptType == null) {
+//                    log.warn("[REC/APT] aptType null. pblancNo={}, aptIdx={}", pblancNo, aptIdx);
+//                    continue;
+//                }
 
-            if (userMapper.findUserRegionByIdx(usersIdx).startsWith(aptMapper.findRegionByAptPblancNo(pblancNo))) {
-                aptReqDTO.setResideSecd(1);
-            } else {
-                aptReqDTO.setResideSecd(2);
+                aptReqDTO.setGnsplyHshldco(aptMapper.getAptSuplyHshldco(aptIdx));
+                aptReqDTO.setSpsplyHshldco(aptMapper.getAptspsplyHshldco(aptIdx));
+                aptReqDTO.setSi(house.getSi());
+                aptReqDTO.setSigungu(house.getSigungu());
+                int total = aptMapper.getAptSuplyHshldco(aptIdx) + aptMapper.getAptspsplyHshldco(aptIdx);
+                aptReqDTO.setTotSuplyHshldco(total);
+                aptReqDTO.setSuplyHshldco(total);
+
+                Integer rank = selectedMapper.getUserRankByUserInfoIdx(userInfo.getUserInfoIdx());
+                aptReqDTO.setHouseRank(rank);
+                aptReqDTO.setScore(userInfo.getTotalGaScore());
+
+                String userRegion = userMapper.findUserRegionByIdx(usersIdx);
+                String aptRegion = aptMapper.findRegionByAptPblancNo(pblancNo);
+                int resideSecd = (userRegion != null && aptRegion != null && userRegion.startsWith(aptRegion)) ? 1 : 2;
+                aptReqDTO.setResideSecd(resideSecd);
+
+                log.debug("[REC/APT] req={}", aptReqDTO);
+
+                Map<String, Object> resp = pythonApiService.requestPrediction(aptReqDTO);
+                Object probabilityObj = (resp == null) ? null : resp.get("probability");
+
+                Integer probKey = toPercentInt(probabilityObj);
+                if (probKey == null) {
+                    log.warn("[REC/APT] probability null/invalid. pblancNo={} resp={}", pblancNo, resp);
+                    continue;
+                }
+                wintProbability.put(probKey, house);
+                log.info("[REC/APT] put prob={} pblancNo={}", probKey, pblancNo);
+
+            } catch (Exception e) {
+                log.error("[REC/APT] failed pblancNo={} usersIdx={} err={}", pblancNo, usersIdx, e.toString(), e);
+                // continue next item
             }
-            Object probability = pythonApiService.requestPrediction(aptReqDTO).get("probability");
-            wintProbability.put((Integer) probability, house);
         }
     }
 
     public void getOfficetelReqDTO(int usersIdx, List<HouseListDTO> officetelHouseList, UserInfoDTO userInfo) {
-        for (HouseListDTO house : officetelHouseList) {
-            String pblancNo = house.getPblancNo();
-            PythonOfficetelRequestDTO officetelReqDTO = new PythonOfficetelRequestDTO();
-            int officetelIdx = aptMapper.findOfficetelIdxByPblancNo(pblancNo);
-            OfficetelDetailDTO officetelDetail = aptMapper.getOfficetelDetails(pblancNo);
-            OfficetelTypeDTO officeType = aptMapper.getOfficetelType(officetelIdx);
-            officetelReqDTO.setTotSuplyHshldco(officetelDetail.getTotSuplyHshldco());
-            officetelReqDTO.setSuplyHshldco(officeType.getSuplyHshldco());
-            if (userMapper.findUserRegionByIdx(usersIdx).startsWith(aptMapper.findRegionByOfficetelPblancNo(pblancNo))) {
-                officetelReqDTO.setResideSecd(1);
-            } else {
-                officetelReqDTO.setResideSecd(2);
-            }
+        log.debug("[REC/OFFI] start items={}", officetelHouseList.size());
 
-            Object probability = pythonApiService.requestOfficetelPrediction(officetelReqDTO).get("probability");
-            wintProbability.put((Integer) probability, house);
+        for (HouseListDTO house : officetelHouseList) {
+            if (house == null) continue;
+            String pblancNo = house.getPblancNo();
+            log.debug("[REC/OFFI] house pblancNo={}", pblancNo);
+
+            try {
+                PythonOfficetelRequestDTO officetelReqDTO = new PythonOfficetelRequestDTO();
+
+                int officetelIdx = aptMapper.findOfficetelIdxByPblancNo(pblancNo);
+                OfficetelDetailDTO officetelDetail = aptMapper.getOfficetelDetails(pblancNo);
+                OfficetelTypeDTO officeType = aptMapper.getOfficetelType(officetelIdx);
+                if (officetelDetail == null || officeType == null) {
+                    log.warn("[REC/OFFI] detail/type null. pblancNo={} officetelIdx={}", pblancNo, officetelIdx);
+                    continue;
+                }
+
+                officetelReqDTO.setTotSuplyHshldco(safeInt(officetelDetail.getTotSuplyHshldco()));
+                officetelReqDTO.setSuplyHshldco(safeInt(officeType.getSuplyHshldco()));
+                officetelReqDTO.setSi(house.getSi());
+                officetelReqDTO.setSigungu(house.getSigungu());
+
+                String userRegion = userMapper.findUserRegionByIdx(usersIdx);
+                String offiRegion = aptMapper.findRegionByOfficetelPblancNo(pblancNo);
+                int resideSecd = (userRegion != null && offiRegion != null && userRegion.startsWith(offiRegion)) ? 1 : 2;
+                officetelReqDTO.setResideSecd(resideSecd);
+
+                log.debug("[REC/OFFI] req={}", officetelReqDTO);
+
+                Map<String, Object> resp = pythonApiService.requestOfficetelPrediction(officetelReqDTO);
+                Object probabilityObj = (resp == null) ? null : resp.get("probability");
+
+                Integer probKey = toPercentInt(probabilityObj);
+                if (probKey == null) {
+                    log.warn("[REC/OFFI] probability null/invalid. pblancNo={} resp={}", pblancNo, resp);
+                    continue;
+                }
+                wintProbability.put(probKey, house);
+                log.info("[REC/OFFI] put prob={} pblancNo={}", probKey, pblancNo);
+
+            } catch (Exception e) {
+                log.error("[REC/OFFI] failed pblancNo={} usersIdx={} err={}", pblancNo, usersIdx, e.toString(), e);
+            }
         }
     }
 
     public PreferenceDTO getPreferenceInfo (int usersIdx, UserInfoDTO userInfo) {
-        int userInfoIdx = userInfo.getUserInfoIdx();
-        List<RegionDTO> siGunGu = userInfoMapper.findSelectedSiGunGuByUserInfoIdx(userInfoIdx);
-        int minHomeSize = userInfoMapper.findSelectedMinHomeSizeByUserInfoIdx(userInfoIdx);
-        int maxHomeSize = userInfoMapper.findSelectedMaxHomeSizeByUserInfoIdx(userInfoIdx);
-        List<String> selectedHomeType = userInfoMapper.findSelectedHomeTypeByUserInfoIdx(userInfoIdx);
+        try {
+            int userInfoIdx = userInfo.getUserInfoIdx();
+            List<RegionDTO> siGunGu = userInfoMapper.findSelectedSiGunGuByUserInfoIdx(userInfoIdx);
+            Integer minHomeSize = userInfoMapper.findSelectedMinHomeSizeByUserInfoIdx(userInfoIdx);
+            Integer maxHomeSize = userInfoMapper.findSelectedMaxHomeSizeByUserInfoIdx(userInfoIdx);
+            List<String> selectedHomeType = userInfoMapper.findSelectedHomeTypeByUserInfoIdx(userInfoIdx);
 
-        PreferenceDTO preference = new PreferenceDTO();
+            PreferenceDTO preference = new PreferenceDTO();
+            preference.setUsersIdx(usersIdx);
+            preference.setSiGunGu(Optional.ofNullable(siGunGu).orElseGet(List::of));
+            preference.setMinHomeSize(minHomeSize == null ? 0 : minHomeSize);
+            preference.setMaxHomeSize(maxHomeSize == null ? Integer.MAX_VALUE : maxHomeSize);
+            preference.setHopeMaxPrice(userInfo.getHopeMaxPrice());
+            preference.setHopeMinPrice(userInfo.getHopeMinPrice());
+            preference.setHomeType(Optional.ofNullable(selectedHomeType).orElseGet(List::of));
+            preference.setMaritalStatus(userInfo.getMaritalStatus());
+            preference.setTotalGaScore(userInfo.getTotalGaScore());
 
-        preference.setUsersIdx(usersIdx);
-        preference.setSiGunGu(siGunGu);
-        preference.setMinHomeSize(minHomeSize);
-        preference.setMaxHomeSize(maxHomeSize);
-        preference.setHopeMaxPrice(userInfo.getHopeMaxPrice());
-        preference.setHopeMinPrice(userInfo.getHopeMinPrice());
-        preference.setHomeType(selectedHomeType);
-        preference.setMaritalStatus(userInfo.getMaritalStatus());
-        preference.setTotalGaScore(userInfo.getTotalGaScore());
-
-        return preference;
+            log.debug("[REC] preference={}", preference);
+            return preference;
+        } catch (Exception e) {
+            log.error("[REC] getPreferenceInfo failed usersIdx={} err={}", usersIdx, e.toString(), e);
+            return null;
+        }
     }
+
+    // ===== Helper =====
+
+    /** Double/BigDecimal/Integer/String 모두 안전 변환 → 0~100 정수(%) */
+    private Integer toPercentInt(Object v) {
+        if (v == null) return null;
+        try {
+            double d;
+            if (v instanceof Number) {
+                d = ((Number) v).doubleValue();
+            } else {
+                d = Double.parseDouble(String.valueOf(v));
+            }
+            // 이미 0~1 이면 0~100으로, 이미 0~100이면 반올림만
+            if (d <= 1.0) d = d * 100.0;
+            if (d < 0) d = 0;
+            if (d > 100) d = 100;
+            return (int) Math.round(d);
+        } catch (Exception e) {
+            log.warn("[REC] toPercentInt invalid value={} err={}", v, e.toString());
+            return null;
+        }
+    }
+
+    private int safeInt(Integer v) { return v == null ? 0 : v; }
 }

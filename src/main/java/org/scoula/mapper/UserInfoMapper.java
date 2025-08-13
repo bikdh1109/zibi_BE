@@ -9,8 +9,8 @@ import java.util.List;
 public interface UserInfoMapper {
     UserInfoDTO getUserInfoByUsersIdx(@Param("usersIdx") int usersIdx);
     List<RegionDTO> findSelectedSiGunGuByUserInfoIdx(@Param("userInfoIdx") int userInfoIdx);
-    int findSelectedMinHomeSizeByUserInfoIdx(@Param("userInfoIdx") int userInfoIdx);
-    int findSelectedMaxHomeSizeByUserInfoIdx(@Param("userInfoIdx") int userInfoIdx);
+    Integer findSelectedMinHomeSizeByUserInfoIdx(@Param("userInfoIdx") int userInfoIdx);
+    Integer findSelectedMaxHomeSizeByUserInfoIdx(@Param("userInfoIdx") int userInfoIdx);
     List<String> findSelectedHomeTypeByUserInfoIdx(@Param("userInfoIdx") int userInfoIdx);
 
 }

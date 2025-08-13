@@ -436,8 +436,14 @@
         WHERE apt_pblanc = #{pblancNo}
     </select>
 
-    <select id="getAptType" resultType="org.scoula.dto.AptTypeDTO">
-        SELECT *
+    <select id="getAptSuplyHshldco" resultType="int">
+        SELECT SUM(suply_hshldco)
+        FROM apt_type
+        WHERE apt_idx = #{aptIdx}
+    </select>
+
+    <select id="getAptspsplyHshldco" resultType="int">
+        SELECT SUM(spsply_hshldco)
         FROM apt_type
         WHERE apt_idx = #{aptIdx}
     </select>
