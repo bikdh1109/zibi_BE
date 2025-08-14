@@ -3,6 +3,7 @@ package org.scoula.controller;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.checkerframework.checker.units.qual.A;
 import org.scoula.dto.AlarmDetailDTO;
 import org.scoula.dto.AlarmListDTO;
 import org.scoula.dto.swagger.Alarm.SwaggerChungyakAlarmDTO;
@@ -43,7 +44,7 @@ public class AlarmController {
     @ApiOperation(value = "새 청약 공고 알람 생성")
     @ApiImplicitParam(name = "Authorization", value = "Bearer 액세스 토큰", required = true, paramType = "header")
     public ResponseEntity<?> createNewNotice(
-            @RequestHeader("Authorization") String bearerToken,
+            @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken,
             @RequestBody SwaggerChungyakAlarmDTO body) {
 
         int userIdx = currentUserIdx(bearerToken);
@@ -56,7 +57,7 @@ public class AlarmController {
     @ApiOperation(value = "청약 접수 시작 알람 생성")
     @ApiImplicitParam(name = "Authorization", value = "Bearer 액세스 토큰", required = true, paramType = "header")
     public ResponseEntity<?> createApplicationStart(
-            @RequestHeader("Authorization") String bearerToken,
+            @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken,
             @RequestBody SwaggerChungyakAlarmDTO body) {
 
         int userIdx = currentUserIdx(bearerToken);
@@ -68,7 +69,7 @@ public class AlarmController {
     @ApiOperation(value = "예치금 미납 알람 생성")
     @ApiImplicitParam(name = "Authorization", value = "Bearer 액세스 토큰", required = true, paramType = "header")
     public ResponseEntity<?> createDepositUnpaid(
-            @RequestHeader("Authorization") String bearerToken,
+            @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken,
             @RequestBody SwaggerDepositDTO body) {
 
         int userIdx = currentUserIdx(bearerToken);
@@ -85,7 +86,7 @@ public class AlarmController {
             @ApiImplicitParam(name = "onlyUnread", value = "미읽음만 조회 여부", required = false, paramType = "query", example = "false")
     })
     public ResponseEntity<List<AlarmListDTO>> getAlarmList(
-            @RequestHeader("Authorization") String bearerToken,
+            @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken,
             @RequestParam(name = "onlyUnread", defaultValue = "false") boolean onlyUnread) {
 
         int userIdx = currentUserIdx(bearerToken);
@@ -96,7 +97,7 @@ public class AlarmController {
     @ApiOperation(value = "알람 단건 상세 조회")
     @ApiImplicitParam(name = "Authorization", value = "Bearer 액세스 토큰", required = true, paramType = "header")
     public ResponseEntity<AlarmDetailDTO> getAlarmDetail(
-            @RequestHeader("Authorization") String bearerToken,
+            @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken,
             @PathVariable("alarmIdx") Long alarmIdx) {
 
         int userIdx = currentUserIdx(bearerToken);
@@ -113,7 +114,7 @@ public class AlarmController {
     @ApiOperation(value = "알람 단건 읽음 처리")
     @ApiImplicitParam(name = "Authorization", value = "Bearer 액세스 토큰", required = true, paramType = "header")
     public ResponseEntity<?> markRead(
-            @RequestHeader("Authorization") String bearerToken,
+            @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken,
             @PathVariable("alarmIdx") Long alarmIdx) {
 
         int userIdx = currentUserIdx(bearerToken);
@@ -126,7 +127,7 @@ public class AlarmController {
     @ApiOperation(value = "알람 전체 읽음 처리")
     @ApiImplicitParam(name = "Authorization", value = "Bearer 액세스 토큰", required = true, paramType = "header")
     public ResponseEntity<?> markAllRead(
-            @RequestHeader("Authorization") String bearerToken) {
+            @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken) {
 
         int userIdx = currentUserIdx(bearerToken);
         int count = alarmService.markAllRead(userIdx);
@@ -139,7 +140,7 @@ public class AlarmController {
     @ApiOperation(value = "알람 단건 삭제")
     @ApiImplicitParam(name = "Authorization", value = "Bearer 액세스 토큰", required = true, paramType = "header")
     public ResponseEntity<?> delete(
-            @RequestHeader("Authorization") String bearerToken,
+            @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken,
             @PathVariable("alarmIdx") Long alarmIdx) {
 
         int userIdx = currentUserIdx(bearerToken);
@@ -152,7 +153,7 @@ public class AlarmController {
     @ApiOperation(value = "사용자 알람 전체 삭제")
     @ApiImplicitParam(name = "Authorization", value = "Bearer 액세스 토큰", required = true, paramType = "header")
     public ResponseEntity<?> deleteAllByUser(
-            @RequestHeader("Authorization") String bearerToken) {
+            @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken) {
 
         int userIdx = currentUserIdx(bearerToken);
         int count = alarmService.deleteAllByUser(userIdx);
