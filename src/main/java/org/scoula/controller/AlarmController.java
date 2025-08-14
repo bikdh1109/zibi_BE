@@ -94,13 +94,27 @@ public class AlarmController {
     }
 
     @GetMapping("/{alarmIdx}")
-    @ApiOperation(value = "알람 단건 상세 조회")
-    @ApiImplicitParam(name = "Authorization", value = "Bearer 액세스 토큰", required = true, paramType = "header")
+    @ApiOperation(
+            value = "알람 단건 상세 조회(자동 읽음 처리)",
+            notes = "상세 조회 시 해당 알람을 자동으로 읽음 처리합니다. markRead=false로 전달하면 읽음 처리를 건너뜁니다."
+    )
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Bearer 액세스 토큰", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "markRead", value = "읽음 처리 여부(기본=true)", required = false, paramType = "query", example = "true")
+    })
     public ResponseEntity<AlarmDetailDTO> getAlarmDetail(
             @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken,
-            @PathVariable("alarmIdx") Long alarmIdx) {
-
+            @PathVariable("alarmIdx") Long alarmIdx,
+            @RequestParam(name = "markRead", defaultValue = "true") boolean markRead
+    ) {
         int userIdx = currentUserIdx(bearerToken);
+
+        // 1) 기본값: 상세조회 시 자동 읽음 처리
+        if (markRead) {
+            alarmService.markRead(alarmIdx, userIdx);
+        }
+
+        // 2) 최신 상태로 상세 조회 반환 (isRead 포함 시 true로 보이도록)
         AlarmDetailDTO detail = alarmService.getAlarmDetail(alarmIdx, userIdx);
         if (detail == null) {
             return ResponseEntity.notFound().build();
@@ -108,20 +122,9 @@ public class AlarmController {
         return ResponseEntity.ok(detail);
     }
 
+
     /* ========================= 읽음 처리 ========================= */
 
-    @PatchMapping("/{alarmIdx}/read")
-    @ApiOperation(value = "알람 단건 읽음 처리")
-    @ApiImplicitParam(name = "Authorization", value = "Bearer 액세스 토큰", required = true, paramType = "header")
-    public ResponseEntity<?> markRead(
-            @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken,
-            @PathVariable("alarmIdx") Long alarmIdx) {
-
-        int userIdx = currentUserIdx(bearerToken);
-        boolean updated = alarmService.markRead(alarmIdx, userIdx);
-        if (!updated) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(Map.of("message", "읽음 처리 완료", "alarmIdx", alarmIdx));
-    }
 
     @PatchMapping("/read-all")
     @ApiOperation(value = "알람 전체 읽음 처리")
