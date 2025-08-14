@@ -31,5 +31,5 @@ public interface SelectedMapper {
                                @Param("homeSize") HomeSizeDTO homeSize,
                                @Param("userRank") int userRank);
 
-    Integer getUserRankByUsersIdx(@Param("userInfoIdx") int userInfoIdx);
+    Integer getUserRankByUsersIdx(@Param("usersIdx") int usersIdx);
 }
