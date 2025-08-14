@@ -104,11 +104,6 @@ public class RecommendationService {
                 PythonAptRequestDTO aptReqDTO = new PythonAptRequestDTO();
 
                 int aptIdx = aptMapper.findAptIdxByPblancNo(pblancNo);
-//                AptTypeDTO aptType = aptMapper.getAptType(aptIdx);
-//                if (aptType == null) {
-//                    log.warn("[REC/APT] aptType null. pblancNo={}, aptIdx={}", pblancNo, aptIdx);
-//                    continue;
-//                }
 
                 aptReqDTO.setGnsplyHshldco(aptMapper.getAptSuplyHshldco(aptIdx));
                 aptReqDTO.setSpsplyHshldco(aptMapper.getAptspsplyHshldco(aptIdx));
