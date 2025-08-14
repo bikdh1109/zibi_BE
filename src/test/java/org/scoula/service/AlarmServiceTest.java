@@ -17,8 +17,35 @@ class AlarmServiceTest {
     @Autowired
     private AlarmService alarmService;
 
-//    @Test
-//    void saveFcmToken() {
-//        alarmService.saveFcmToken(43,"<Token>");
-//    }
+    @Test
+    void testCreateNewNotice() {
+        Long alarmIdx = alarmService.createNewNotice(
+                "테스트 공고",
+                "테스트 내용",
+                "https://example.com",
+                43
+        );
+        log.info("생성된 NEW_NOTICE 알람 ID = {}", alarmIdx);
+    }
+
+    @Test
+    void testCreateApplicationStart() {
+        Long alarmIdx = alarmService.createApplicationStart(
+                "접수 시작",
+                "접수 시작 안내",
+                "https://apply.com",
+                43
+        );
+        log.info("생성된 APPLICATION_START 알람 ID = {}", alarmIdx);
+    }
+
+    @Test
+    void testCreateDepositUnpaid() {
+        Long alarmIdx = alarmService.createDepositUnpaid(
+                "예치금 미납",
+                "예치금이 미납되었습니다.",
+                43
+        );
+        log.info("생성된 DEPOSIT_UNPAID 알람 ID = {}", alarmIdx);
+    }
 }
