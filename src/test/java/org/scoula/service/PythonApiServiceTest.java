@@ -30,11 +30,6 @@ class PythonApiServiceTest {
         log.info(dto.toString());
     }
 
-    @Test
-    void selectedMapperTest() {
-        Integer rank = selectedMapper.getUserRankByUsersIdx(43);
-        System.out.println("rank = " + rank);
-    }
 
     @Test
     void checkResideCode() {
