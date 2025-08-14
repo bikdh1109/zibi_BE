@@ -1,6 +1,7 @@
 package org.scoula.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,7 @@ import java.time.LocalTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AlarmListDTO {
     private Long alarmIdx;
     private String title;
@@ -20,7 +22,5 @@ public class AlarmListDTO {
     private LocalDate alarmDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime alarmTime;
-    private String content;
-    private String link;
-    private boolean isRouting;
+    private boolean isRead;
 }
