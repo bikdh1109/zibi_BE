@@ -22,9 +22,9 @@ public class RecommendationService {
     private final SelectedMapper selectedMapper;
 
     /** 정렬을 위해 확률(정수 %)을 key 로 사용 */
-    public final Map<Integer, HouseListDTO> wintProbability = new HashMap<>();
+    public final Map<Integer, RecommendationListDTO> wintProbability = new HashMap<>();
 
-    public List<HouseListDTO> getRecommendationList(Integer usersIdx) {
+    public List<RecommendationListDTO> getRecommendationList(Integer usersIdx) {
         long t0 = System.currentTimeMillis();
         log.info("[REC] getRecommendationList start usersIdx={}", usersIdx);
 
@@ -58,7 +58,7 @@ public class RecommendationService {
             // APT
             try {
                 if (preference.getHomeType() != null && preference.getHomeType().contains("APT")) {
-                    List<HouseListDTO> aptHouseList = houseListMapper.getAptRecommendationList(region, preference);
+                    List<RecommendationListDTO> aptHouseList = houseListMapper.getAptRecommendationList(region, preference);
                     log.info("[REC] APT candidates={}", aptHouseList == null ? 0 : aptHouseList.size());
                     getAptReqDTO(usersIdx, Optional.ofNullable(aptHouseList).orElseGet(List::of), userInfo);
                 }
@@ -69,7 +69,7 @@ public class RecommendationService {
             // 오피스텔
             try {
                 if (preference.getHomeType() != null && preference.getHomeType().contains("오피스텔")) {
-                    List<HouseListDTO> officetelHouseList = houseListMapper.getOfficetelRecommendationList(region, preference);
+                    List<RecommendationListDTO> officetelHouseList = houseListMapper.getOfficetelRecommendationList(region, preference);
                     log.info("[REC] Officetel candidates={}", officetelHouseList == null ? 0 : officetelHouseList.size());
                     getOfficetelReqDTO(usersIdx, Optional.ofNullable(officetelHouseList).orElseGet(List::of), userInfo);
                 }
@@ -79,23 +79,32 @@ public class RecommendationService {
         }
 
         // 정렬
-        Map<Integer, HouseListDTO> sortedMap = new TreeMap<>(Collections.reverseOrder());
+        Map<Integer, RecommendationListDTO> sortedMap = new TreeMap<>(Collections.reverseOrder());
         sortedMap.putAll(wintProbability);
-        // sortedMap 로그찍기
-        for (Map.Entry<Integer, HouseListDTO> entry : sortedMap.entrySet()) {
-            Integer key = entry.getKey();
-            HouseListDTO house = entry.getValue();
-            log.info("[REC] sortedMap key={} housePblancNo={} houseType={}", key, house.getPblancNo(), house.getHouseType());
+
+        // ✅ 순위 설정 추가
+        int rank = 1;
+        for (RecommendationListDTO dto : sortedMap.values()) {
+            dto.setRank(rank++);
         }
-        List<HouseListDTO> winProbabilityList = new ArrayList<>(sortedMap.values());
+
+        // 로그 출력
+        for (Map.Entry<Integer, RecommendationListDTO> entry : sortedMap.entrySet()) {
+            Integer key = entry.getKey();
+            RecommendationListDTO house = entry.getValue();
+            log.info("[REC] sortedMap key={} rank={} housePblancNo={} houseType={}",
+                    key, house.getRank(), house.getPblancNo(), house.getHouseType());
+        }
+
+        List<RecommendationListDTO> winProbabilityList = new ArrayList<>(sortedMap.values());
         log.info("[REC] done. totalSelected={} elapsedMs={}", winProbabilityList.size(), (System.currentTimeMillis() - t0));
         return winProbabilityList;
     }
 
-    public void getAptReqDTO(int usersIdx, List<HouseListDTO> aptHouseList, UserInfoDTO userInfo) {
+    public void getAptReqDTO(int usersIdx, List<RecommendationListDTO> aptHouseList, UserInfoDTO userInfo) {
         log.debug("[REC/APT] start items={}", aptHouseList.size());
 
-        for (HouseListDTO house : aptHouseList) {
+        for (RecommendationListDTO house : aptHouseList) {
             if (house == null) continue;
             String pblancNo = house.getPblancNo();
             log.debug("[REC/APT] house pblancNo={}", pblancNo);
@@ -104,11 +113,6 @@ public class RecommendationService {
                 PythonAptRequestDTO aptReqDTO = new PythonAptRequestDTO();
 
                 int aptIdx = aptMapper.findAptIdxByPblancNo(pblancNo);
-//                AptTypeDTO aptType = aptMapper.getAptType(aptIdx);
-//                if (aptType == null) {
-//                    log.warn("[REC/APT] aptType null. pblancNo={}, aptIdx={}", pblancNo, aptIdx);
-//                    continue;
-//                }
 
                 aptReqDTO.setGnsplyHshldco(aptMapper.getAptSuplyHshldco(aptIdx));
                 aptReqDTO.setSpsplyHshldco(aptMapper.getAptspsplyHshldco(aptIdx));
@@ -147,10 +151,10 @@ public class RecommendationService {
         }
     }
 
-    public void getOfficetelReqDTO(int usersIdx, List<HouseListDTO> officetelHouseList, UserInfoDTO userInfo) {
+    public void getOfficetelReqDTO(int usersIdx, List<RecommendationListDTO> officetelHouseList, UserInfoDTO userInfo) {
         log.debug("[REC/OFFI] start items={}", officetelHouseList.size());
 
-        for (HouseListDTO house : officetelHouseList) {
+        for (RecommendationListDTO house : officetelHouseList) {
             if (house == null) continue;
             String pblancNo = house.getPblancNo();
             log.debug("[REC/OFFI] house pblancNo={}", pblancNo);
