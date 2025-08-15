@@ -3,6 +3,7 @@ package org.scoula.controller;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import org.scoula.dto.HouseListDTO;
+import org.scoula.dto.RecommendationListDTO;
 import org.scoula.dto.UserSelectedDTO;
 import org.scoula.mapper.UserMapper;
 import org.scoula.security.util.JwtProcessor;
@@ -58,12 +59,12 @@ public class UserSelectedController {
             @ApiResponse(code = 404, message = "선호 정보 없음")
     })
 
-    public ResponseEntity<List<HouseListDTO>> getRecommendations(
+    public ResponseEntity<List<RecommendationListDTO>> getRecommendations(
             @ApiParam(hidden = true) @RequestHeader("Authorization") String token
     ) {
         String userId = extractUserIdFromToken(token);
         int usersIdx = userMapper.findUserIdxByUserId(userId);
-        List<HouseListDTO> result = recommendationService.getRecommendationList(usersIdx);
+        List<RecommendationListDTO> result = recommendationService.getRecommendationList(usersIdx);
         return ResponseEntity.ok(result);
     }
 

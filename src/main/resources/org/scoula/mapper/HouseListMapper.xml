@@ -18,7 +18,7 @@
                                AND uf.users_idx = #{userIdx}
     </select>
 
-    <select id="getAptRecommendationList" resultType="org.scoula.dto.HouseListDTO">
+    <select id="getAptRecommendationList" resultType="org.scoula.dto.RecommendationListDTO">
         <![CDATA[
             SELECT
                 v.house_nm, v.pblanc_no, v.application_period, v.si, v.sigungu, v.hssply_adres,
@@ -50,7 +50,7 @@
             ]]>
     </select>
 
-    <select id="getOfficetelRecommendationList" resultType="org.scoula.dto.HouseListDTO">
+    <select id="getOfficetelRecommendationList" resultType="org.scoula.dto.RecommendationListDTO">
         <![CDATA[
             SELECT
                 v.house_nm, v.pblanc_no, v.application_period, v.si, v.sigungu, v.hssply_adres,
