@@ -47,7 +47,7 @@ public class AlarmController {
             @RequestBody SwaggerChungyakAlarmDTO body) {
 
         int userIdx = currentUserIdx(bearerToken);
-        Long alarmIdx = alarmService.createNewNotice(body.getTitle(), body.getContent(), body.getLink(), userIdx);
+        Long alarmIdx = alarmService.createNewNotice(body.getTitle(), body.getContent(), body.getLink(),body.getHouseType(), userIdx);
         return ResponseEntity.ok(Map.of("message", "알람 저장 완료", "alarmIdx", alarmIdx));
     }
 
@@ -59,7 +59,7 @@ public class AlarmController {
             @RequestBody SwaggerChungyakAlarmDTO body) {
 
         int userIdx = currentUserIdx(bearerToken);
-        Long alarmIdx = alarmService.createApplicationStart(body.getTitle(), body.getContent(), body.getLink(), userIdx);
+        Long alarmIdx = alarmService.createApplicationStart(body.getTitle(), body.getContent(), body.getLink(),body.getHouseType() ,userIdx);
         return ResponseEntity.ok(Map.of("message", "알람 저장 완료", "alarmIdx", alarmIdx));
     }
 
@@ -104,12 +104,10 @@ public class AlarmController {
     ) {
         int userIdx = currentUserIdx(bearerToken);
 
-        // 1) 기본값: 상세조회 시 자동 읽음 처리
         if (markRead) {
             alarmService.markRead(alarmIdx, userIdx);
         }
 
-        // 2) 최신 상태로 상세 조회 반환 (isRead 포함 시 true로 보이도록)
         AlarmDetailDTO detail = alarmService.getAlarmDetail(alarmIdx, userIdx);
         if (detail == null) {
             return ResponseEntity.notFound().build();
