@@ -16,7 +16,7 @@
     <!-- 상세 조회: 전체 컬럼 -->
     <select id="getAlarmDetail" resultType="org.scoula.dto.AlarmDetailDTO">
         SELECT alarm_idx, alarm_type, title, alarm_date, alarm_time, content,
-               link, is_routing, is_read, users_idx
+               link, is_routing, is_read, users_idx,house_type
         FROM alarm
         WHERE alarm_idx = #{alarmIdx}
           AND users_idx = #{usersIdx}
@@ -26,10 +26,10 @@
     <insert id="insertDetail" parameterType="org.scoula.dto.AlarmDetailDTO"
             useGeneratedKeys="true" keyProperty="alarmIdx">
         INSERT INTO alarm
-        (alarm_type, title, alarm_date, alarm_time, content, link, is_routing, is_read, users_idx)
+        (alarm_type, title, alarm_date, alarm_time, content, link, is_routing, is_read, users_idx,house_type)
         VALUES
             (#{alarmType}, #{title}, #{alarmDate}, #{alarmTime}, #{content},
-             #{link}, #{isRouting}, #{isRead}, #{usersIdx})
+             #{link}, #{isRouting}, #{isRead}, #{usersIdx},#{houseType})
     </insert>
 
     <update id="markRead">

@@ -38,11 +38,12 @@ public class AlarmService {
 
     /** 1) 새로운 청약 공고 알람: isRouting=false, link 옵션 */
     @Transactional
-    public Long createNewNotice(String title, String content, String link, Integer usersIdx) {
+    public Long createNewNotice(String title, String content, String link,String houseType ,Integer usersIdx) {
         var dto = base(title, content, usersIdx);
         dto.setAlarmType(AlarmType.NEW_NOTICE);
         dto.setRouting(false);
         dto.setLink(link); // null 허용
+        dto.setHouseType(houseType);
         alarmMapper.insertDetail(dto);
         log.info("[NEW_NOTICE] DB Insert 완료,{}", dto);
         return dto.getAlarmIdx();
@@ -50,11 +51,12 @@ public class AlarmService {
 
     /** 2) 청약 접수 시작 알람: isRouting=true, link 권장 */
     @Transactional
-    public Long createApplicationStart(String title, String content, String link, Integer usersIdx) {
+    public Long createApplicationStart(String title, String content, String link,String houseType ,Integer usersIdx) {
         AlarmDetailDTO dto = base(title, content, usersIdx);
         dto.setAlarmType(AlarmType.APPLICATION_START);
         dto.setRouting(true);
-        dto.setLink(link); // null 가능하나 라우팅이면 넣는 것을 권장
+        dto.setLink(link);
+        dto.setHouseType(houseType);// null 가능하나 라우팅이면 넣는 것을 권장
         alarmMapper.insertDetail(dto);
         log.info("[APPLICATION_START] DB Insert 완료, {}", dto);
         return dto.getAlarmIdx();

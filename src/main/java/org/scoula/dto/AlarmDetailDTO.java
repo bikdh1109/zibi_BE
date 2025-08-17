@@ -1,6 +1,8 @@
 package org.scoula.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +26,8 @@ public class AlarmDetailDTO {
     private LocalTime alarmTime;
     private String content;
     private String link;
+    @JsonProperty("house_type")
+    private String houseType;
     private boolean isRouting;
     private boolean isRead;
     private Integer usersIdx;
