@@ -18,9 +18,9 @@ public class SyncDB {
     @Autowired
     private AptService aptService;
 
-    @Test
-    void syncDB() {
-        aptService.syncAptData();
-        officetelService.syncOfficetelData();
-    }
+//    @Test
+//    void syncDB() {
+//        aptService.syncAptData();
+//        officetelService.syncOfficetelData();
+//    }
 }
