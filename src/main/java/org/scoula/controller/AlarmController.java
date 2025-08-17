@@ -81,12 +81,8 @@ public class AlarmController {
     }
 
     /* ========================= 조회 ========================= */
-
     @GetMapping("/list")
     @ApiOperation(value = "알람 목록 조회", notes = "onlyUnread=true면 미읽음만 반환")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "onlyUnread", value = "미읽음만 조회 여부", required = false, paramType = "query", example = "false")
-    })
     public ResponseEntity<List<AlarmListDTO>> getAlarmList(
             @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken,
             @RequestParam(name = "onlyUnread", defaultValue = "false") boolean onlyUnread) {
@@ -100,9 +96,6 @@ public class AlarmController {
             value = "알람 단건 상세 조회(자동 읽음 처리)",
             notes = "상세 조회 시 해당 알람을 자동으로 읽음 처리합니다. markRead=false로 전달하면 읽음 처리를 건너뜁니다."
     )
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "markRead", value = "읽음 처리 여부(기본=true)", required = false, paramType = "query", example = "true")
-    })
     public ResponseEntity<AlarmDetailDTO> getAlarmDetail(
             @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken,
             @PathVariable("alarmIdx") Long alarmIdx,
@@ -159,13 +152,10 @@ public class AlarmController {
         return ResponseEntity.ok(Map.of("message", "전체 삭제 완료", "deletedCount", count));
     }
 
+    /* ========================= FCM 토큰 ========================= */
+
     @PutMapping("/token")
     @ApiOperation(value = "FCM 토큰 저장/갱신", notes = "Authorization: Bearer {accessToken} 필요")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "Bearer 액세스 토큰",
-                    required = true, paramType = "header", dataType = "string",
-                    example = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
-    })
 
     public ResponseEntity<?> saveToken(
             @ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken,
@@ -197,11 +187,6 @@ public class AlarmController {
 
     @DeleteMapping("/token")
     @ApiOperation(value = "FCM 토큰 삭제(초기화)", notes = "Authorization: Bearer {accessToken} 필요")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "Bearer 액세스 토큰",
-                    required = true, paramType = "header", dataType = "string",
-                    example = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
-    })
 
     public ResponseEntity<?> deleteToken(@ApiParam(hidden = true) @RequestHeader("Authorization") String bearerToken) {
         try {
@@ -246,7 +231,7 @@ public class AlarmController {
     @PostMapping("/send")
     public ResponseEntity<?> sendPush(
             @RequestHeader("Authorization") String bearerToken,
-            @RequestBody AlarmMessageRequest alramMessageRequest) {
+            @RequestBody AlarmMessageRequest alarmMessageRequest) {
 
         try {
             // 1. Authorization 헤더 검증
@@ -277,9 +262,9 @@ public class AlarmController {
             }
 
             // 5. 요청 메시지 유효성 검사
-            if (alramMessageRequest == null ||
-                    alramMessageRequest.getTitle() == null || alramMessageRequest.getTitle().isBlank() ||
-                    alramMessageRequest.getBody() == null || alramMessageRequest.getBody().isBlank()) {
+            if (alarmMessageRequest == null ||
+                    alarmMessageRequest.getTitle() == null || alarmMessageRequest.getTitle().isBlank() ||
+                    alarmMessageRequest.getBody() == null || alarmMessageRequest.getBody().isBlank()) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "title과 body는 필수 입력값입니다."));
             }
@@ -291,8 +276,7 @@ public class AlarmController {
                         .body(Map.of("error", "등록된 FCM 토큰이 없습니다."));
             }
 
-            // 7. 푸시 전송
-            fcmService.sendMessage(token, alramMessageRequest.getTitle(), alramMessageRequest.getBody());
+            fcmService.sendMessage(token, alarmMessageRequest.getTitle(), alarmMessageRequest.getBody());
 
             return ResponseEntity.ok(Map.of("message", "푸시 전송 완료"));
 
