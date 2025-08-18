@@ -60,12 +60,12 @@ public class UserSelectedController {
     })
 
     public ResponseEntity<List<RecommendationListDTO>> getRecommendations(
-            @ApiParam(hidden = true) @RequestHeader("Authorization") String token
+            @ApiParam(hidden = true) @RequestHeader("Authorization") String authHeader
     ) {
-        String userId = extractUserIdFromToken(token);
-        int usersIdx = userMapper.findUserIdxByUserId(userId);
-        List<RecommendationListDTO> result = recommendationService.getRecommendationList(usersIdx);
-        return ResponseEntity.ok(result);
+        String token = authHeader.replace("Bearer ", ""); // "Bearer " 제거
+        String username = jwtProcessor.getUsername(token);
+        int usersIdx = userMapper.findUserIdxByUserId(username);
+        return ResponseEntity.ok(recommendationService.getRecommendationList(usersIdx));
     }
 
 }
